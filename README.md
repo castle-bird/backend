@@ -1,0 +1,1 @@
+[![codecov](https://codecov.io/gh/castle-bird/backend/graph/badge.svg?token=IW9WHKXOXQ)](https://codecov.io/gh/castle-bird/backend)
