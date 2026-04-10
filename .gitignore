@@ -40,7 +40,6 @@ out/
 .env
 application-dev.yaml
 application-prod.yaml
-application-test.yaml
 
 ### AI ###
 ### AI ###
