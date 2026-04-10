@@ -35,11 +35,7 @@ spring:
         order_updates: true
         default_batch_fetch_size: 100  # 조회 최적화: N+1 문제 방지
 
-  flyway:
-    locations:
-      - classpath:db/migration
-
-  jackson:
+  Jackson:
     default-property-inclusion: non_null  # null 필드 응답 제외
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Seoul
