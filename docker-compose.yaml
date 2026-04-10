@@ -23,9 +23,36 @@ services:
     networks:
       - backend_network
 
+  redis:
+    image: redis:7-alpine
+    container_name: redis_backend
+    restart: unless-stopped
+    environment:
+      REDIS_USERNAME: ${REDIS_USERNAME}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    entrypoint:
+      - sh
+      - -c
+      - |
+        printf 'user default off nopass nocommands\nuser %s on >%s ~* &* +@all\n' \
+          "$REDIS_USERNAME" "$REDIS_PASSWORD" > /tmp/users.acl
+        exec redis-server --aclfile /tmp/users.acl --appendonly yes
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--user", "${REDIS_USERNAME}", "--pass", "${REDIS_PASSWORD}", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - backend_network
 
 volumes:
   postgres_data:
+  redis_data:
 
 networks:
   backend_network:

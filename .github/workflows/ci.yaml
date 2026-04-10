@@ -18,6 +18,8 @@ jobs:
   build-and-test:
     name: Build and Test (Java 17)
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: 체크아웃
