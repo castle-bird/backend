@@ -36,7 +36,6 @@ spring:
         default_batch_fetch_size: 100  # 조회 최적화: N+1 문제 방지
 
   flyway:
-    enabled: true
     locations:
       - classpath:db/migration
 
