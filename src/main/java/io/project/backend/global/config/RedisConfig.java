@@ -1,6 +1,8 @@
 package io.project.backend.global.config;
 
-import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -16,22 +18,35 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 @EnableCaching
+@EnableConfigurationProperties(RedisProperties.class)
 public class RedisConfig {
 
   // 어노테이션 기반 캐시 설정
   @Bean
-  public CacheManager redisCacheManager(RedisConnectionFactory connectionFactory) {
-
-    RedisCacheConfiguration configuration = RedisCacheConfiguration.defaultCacheConfig()
+  public CacheManager cacheManager(
+      RedisConnectionFactory connectionFactory,
+      RedisProperties redisProperties
+  ) {
+    RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
+        .entryTtl(redisProperties.getDefaultTtl())
         .disableCachingNullValues() // Null 캐싱처리 안함
-        .entryTtl(Duration.ofDays(7)) // 7일동안 캐시 유지
         // Key를 문자열로 직렬화 (Redis CLI에서 보기 편하게 하기 위함)
-        .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+        .serializeKeysWith(
+            RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
         // Value는 JSON 형태로 직렬화해서 저장
-        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
+        .serializeValuesWith(
+            RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
+
+    Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
+
+    // RedisProperties에서 정의한 캐시별 TTL 설정을 적용
+    redisProperties.getCaches().forEach((cacheName, cacheSpec) -> {
+      cacheConfigurations.put(cacheName, defaultConfig.entryTtl(cacheSpec.ttl()));
+    });
 
     return RedisCacheManager.builder(connectionFactory)
-        .cacheDefaults(configuration)
+        .cacheDefaults(defaultConfig)
+        .withInitialCacheConfigurations(cacheConfigurations)
         .build();
   }
 
