@@ -2,42 +2,20 @@ package io.project.backend.redis;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.project.backend.support.IntegrationTest;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnectionCommands;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
-@SpringBootTest
-@Testcontainers
-@ActiveProfiles("test")
-class RedisTest {
-
-  @Container
-  static GenericContainer<?> redisContainer =
-      new GenericContainer<>(DockerImageName.parse("redis:7-alpine"))
-          .withExposedPorts(6379);
-
-  @DynamicPropertySource
-  static void redisProperties(DynamicPropertyRegistry registry) {
-    registry.add("spring.data.redis.host", redisContainer::getHost);
-    registry.add("spring.data.redis.port", redisContainer::getFirstMappedPort);
-    registry.add("spring.data.redis.username", () -> "");
-    registry.add("spring.data.redis.password", () -> "");
-  }
+class RedisTest extends IntegrationTest {
 
   @Autowired
   private RedisTemplate<String, String> redisTemplate;
@@ -47,6 +25,7 @@ class RedisTest {
 
   @AfterEach
   void tearDown() {
+    // 테스트 간 데이터 격리를 위해 매 테스트 후 Redis 전체 초기화
     redisTemplate.execute((RedisCallback<Void>) connection -> {
       connection.serverCommands().flushAll();
       return null;
@@ -56,7 +35,7 @@ class RedisTest {
   @Test
   @DisplayName("Redis 서버 연결 확인")
   void ping() {
-    String pong = redisTemplate.execute((RedisCallback<String>) connection -> connection.ping());
+    String pong = redisTemplate.execute(RedisConnectionCommands::ping);
     assertThat(pong).isEqualTo("PONG");
   }
 

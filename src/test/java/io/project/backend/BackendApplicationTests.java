@@ -1,15 +1,11 @@
 package io.project.backend;
 
+import io.project.backend.support.IntegrationTest;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
-@ActiveProfiles("test")
-class BackendApplicationTests {
+class BackendApplicationTests extends IntegrationTest {
 
-  @Test
-  void contextLoads() {
-  }
-
+    @Test
+    void contextLoads() {
+    }
 }
