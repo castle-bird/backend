@@ -35,14 +35,17 @@ public class RedisConfig {
             RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
         // Value는 JSON 형태로 직렬화해서 저장
         .serializeValuesWith(
-            RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
+            RedisSerializationContext.SerializationPair.fromSerializer(
+                new GenericJackson2JsonRedisSerializer()));
 
     Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
 
     // RedisProperties에서 정의한 캐시별 TTL 설정을 적용
-    redisProperties.getCaches().forEach((cacheName, cacheSpec) -> {
-      cacheConfigurations.put(cacheName, defaultConfig.entryTtl(cacheSpec.ttl()));
-    });
+    if (redisProperties.getCaches() != null) {
+      redisProperties.getCaches().forEach((cacheName, cacheSpec) -> {
+        cacheConfigurations.put(cacheName, defaultConfig.entryTtl(cacheSpec.ttl()));
+      });
+    }
 
     return RedisCacheManager.builder(connectionFactory)
         .cacheDefaults(defaultConfig)
