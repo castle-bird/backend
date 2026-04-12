@@ -6,9 +6,10 @@
 CREATE TYPE employee_role AS ENUM ('ADMIN', 'MANAGER', 'EMPLOYEE');
 CREATE TYPE reservation_status AS ENUM ('CONFIRMED', 'CANCELLED');
 CREATE TYPE notification_type AS ENUM (
-    'RESERVATION_CONFIRMED',
-    'RESERVATION_CANCELLED',
-    'FULL_NOTIFICATION'
+    'RESERVATION_CANCELLED', -- 관리자/매니저가 타인 예약 취소 시 예약자에게 발송
+    'FULL_NOTIFICATION',     -- 전사 공지 (recipient_id = NULL, 전체 발송)
+    'SALARY_CHANGED',        -- 월급/연봉/보너스 변경 시 해당 직원에게 발송
+    'POSITION_CHANGED'       -- 직급/역할 변경 시 해당 직원에게 발송
     );
 
 -- btree_gist 확장 (EXCLUDE USING gist 사용을 위해 필요)
@@ -19,9 +20,9 @@ CREATE EXTENSION IF NOT EXISTS btree_gist;
 --------------------------------------------------------------------------------
 CREATE TABLE departments
 (
-    id         SERIAL PRIMARY KEY,
+    id         BIGSERIAL PRIMARY KEY,
     name       VARCHAR(100) NOT NULL UNIQUE,
-    manager_id INT, -- FK는 employees 생성 후 ALTER로 추가
+    manager_id BIGINT, -- FK는 employees 생성 후 ALTER로 추가
     created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
@@ -31,14 +32,14 @@ CREATE TABLE departments
 --------------------------------------------------------------------------------
 CREATE TABLE employees
 (
-    id              SERIAL PRIMARY KEY,
+    id              BIGSERIAL PRIMARY KEY,
     employee_number VARCHAR(20)   NOT NULL UNIQUE,
     name            VARCHAR(50)   NOT NULL,
     email           VARCHAR(100)  NOT NULL UNIQUE,
     password        VARCHAR(255)  NOT NULL,
     role            employee_role NOT NULL DEFAULT 'EMPLOYEE',
     position        VARCHAR(50)   NOT NULL,
-    department_id   INT           REFERENCES departments (id) ON DELETE SET NULL,
+    department_id   BIGINT        REFERENCES departments (id) ON DELETE SET NULL,
     hire_date       DATE,
     is_deleted      BOOLEAN       NOT NULL DEFAULT FALSE,
     deleted_at      TIMESTAMPTZ,
@@ -65,8 +66,8 @@ CREATE INDEX idx_employees_department ON employees (department_id) WHERE is_dele
 --------------------------------------------------------------------------------
 CREATE TABLE salaries
 (
-    id           SERIAL PRIMARY KEY,
-    employee_id  INT            NOT NULL REFERENCES employees (id) ON DELETE RESTRICT,
+    id           BIGSERIAL PRIMARY KEY,
+    employee_id  BIGINT         NOT NULL REFERENCES employees (id) ON DELETE RESTRICT,
     month_salary NUMERIC(15, 2) NOT NULL CHECK (month_salary >= 0),    -- 월급
     year_salary  NUMERIC(15, 2) NOT NULL CHECK (year_salary >= 0),     -- 연봉
     bonus        NUMERIC(15, 2) NOT NULL DEFAULT 0 CHECK (bonus >= 0), -- 보너스
@@ -80,7 +81,7 @@ CREATE TABLE salaries
 --------------------------------------------------------------------------------
 CREATE TABLE meeting_rooms
 (
-    id         SERIAL PRIMARY KEY,
+    id         BIGSERIAL PRIMARY KEY,
     name       VARCHAR(100) NOT NULL UNIQUE,
     location   VARCHAR(200) NOT NULL,
     is_active  BOOLEAN      NOT NULL DEFAULT TRUE,
@@ -93,9 +94,9 @@ CREATE TABLE meeting_rooms
 --------------------------------------------------------------------------------
 CREATE TABLE room_reservations
 (
-    id          SERIAL PRIMARY KEY,
-    room_id     INT                NOT NULL REFERENCES meeting_rooms (id) ON DELETE RESTRICT,
-    employee_id INT                NOT NULL REFERENCES employees (id) ON DELETE RESTRICT,
+    id          BIGSERIAL PRIMARY KEY,
+    room_id     BIGINT             NOT NULL REFERENCES meeting_rooms (id) ON DELETE RESTRICT,
+    employee_id BIGINT             NOT NULL REFERENCES employees (id) ON DELETE RESTRICT,
     purpose     VARCHAR(255)       NOT NULL,
     start_time  TIMESTAMPTZ        NOT NULL,
     end_time    TIMESTAMPTZ        NOT NULL,
@@ -124,28 +125,34 @@ CREATE INDEX idx_reservations_employee
 --------------------------------------------------------------------------------
 CREATE TABLE notifications
 (
-    id         SERIAL PRIMARY KEY,
-    sender_id  INT               REFERENCES employees (id) ON DELETE SET NULL,
-    type       notification_type NOT NULL,
-    title      VARCHAR(200)      NOT NULL,
-    message    TEXT,
-    created_at TIMESTAMPTZ       NOT NULL DEFAULT NOW()
+    id           BIGSERIAL PRIMARY KEY,
+    sender_id    BIGINT            REFERENCES employees (id) ON DELETE SET NULL,
+    recipient_id BIGINT            REFERENCES employees (id) ON DELETE SET NULL, -- NULL이면 전체 공지
+    type         notification_type NOT NULL,
+    title        VARCHAR(200)      NOT NULL,
+    message      TEXT,
+    created_at   TIMESTAMPTZ       NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_notifications_sender_created
     ON notifications (sender_id, created_at DESC);
+
+-- 개인 알림 조회: 특정 수신자의 알림 목록을 최신순으로 조회
+CREATE INDEX idx_notifications_recipient_created
+    ON notifications (recipient_id, created_at DESC)
+    WHERE recipient_id IS NOT NULL;
 
 --------------------------------------------------------------------------------
 -- refresh_tokens
 --------------------------------------------------------------------------------
 CREATE TABLE refresh_tokens
 (
-    id          SERIAL PRIMARY KEY,
-    employee_id INT          NOT NULL REFERENCES employees (id) ON DELETE CASCADE,
+    id          BIGSERIAL PRIMARY KEY,
+    employee_id BIGINT       NOT NULL REFERENCES employees (id) ON DELETE CASCADE,
     token       VARCHAR(512) NOT NULL UNIQUE,
     expires_at  TIMESTAMPTZ  NOT NULL,
     is_revoked  BOOLEAN      NOT NULL DEFAULT FALSE,
-    replaced_by INT          REFERENCES refresh_tokens (id) ON DELETE SET NULL,
+    replaced_by BIGINT       REFERENCES refresh_tokens (id) ON DELETE SET NULL,
     created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
