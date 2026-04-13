@@ -4,6 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -40,11 +41,10 @@ public class SecurityConfig {
   // 권한 경로 설정
   private Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry> authorizeCustomizer() {
     return auth -> auth
-        .requestMatchers(
-            "/",
-            "/login",
-            "/join"
-        ).permitAll()
+        .requestMatchers(HttpMethod.POST, "/auth/signup").permitAll()
+        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+        .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
+        .requestMatchers(HttpMethod.POST, "/auth/logout").authenticated()
         .anyRequest().authenticated();
   }
 
