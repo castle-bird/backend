@@ -1,8 +1,9 @@
 package io.project.backend.domain.auth.controller;
 
-import io.project.backend.domain.auth.dto.request.SignupRequest;
 import io.project.backend.domain.auth.dto.common.AuthTokenDto;
-import io.project.backend.domain.auth.dto.response.SignupResponse;
+import io.project.backend.domain.auth.dto.request.LoginRequest;
+import io.project.backend.domain.auth.dto.request.SignupRequest;
+import io.project.backend.domain.auth.dto.response.AuthResponse;
 import io.project.backend.domain.auth.service.AuthService;
 import io.project.backend.global.response.ApiResponse;
 import io.project.backend.global.security.jwt.JwtProperties;
@@ -27,28 +28,56 @@ public class AuthController {
   private final AuthService authService;
 
   @PostMapping("/signup")
-  public ResponseEntity<ApiResponse<SignupResponse>> signup(
+  public ResponseEntity<ApiResponse<AuthResponse>> signup(
       @Valid @RequestBody SignupRequest signupRequest
   ) {
 
     AuthTokenDto authTokenDto = authService.signup(signupRequest);
 
-    ResponseCookie responseCookie = ResponseCookie.from("refreshToken",
-            authTokenDto.refreshToken())
+    ResponseCookie responseCookie = createRefreshTokenCookie(authTokenDto.refreshToken());
+
+    return ResponseEntity
+        .status(HttpStatus.CREATED)
+        .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
+        .body(ApiResponse.created(
+            AuthResponse.from(
+                authTokenDto.accessToken()
+            )
+        ));
+  }
+
+  @PostMapping("/login")
+  public ResponseEntity<ApiResponse<AuthResponse>> login(
+      @Valid @RequestBody LoginRequest loginRequest
+  ) {
+
+    AuthTokenDto authTokenDto = authService.login(loginRequest);
+
+    ResponseCookie responseCookie = createRefreshTokenCookie(authTokenDto.refreshToken());
+
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
+        .body(ApiResponse.ok(
+            AuthResponse.from(
+                authTokenDto.accessToken()
+            )
+        ));
+  }
+
+  /**
+   * 지정된 속성으로 secure 및 HTTP-only refresh token cookie를 생성한다.
+   *
+   * @param refreshToken cookie에 포함할 refresh token
+   * @return HTTP\-only, secure flag, SameSite policy, 만료 시간이 설정된 `ResponseCookie`
+   */
+  private ResponseCookie createRefreshTokenCookie(String refreshToken) {
+    return ResponseCookie.from("refreshToken", refreshToken)
         .httpOnly(true)
         .secure(jwtProperties.secure())
         .path("/")
         .sameSite("lax")
         .maxAge(Duration.ofMillis(jwtProperties.refreshTokenExpiration()))
         .build();
-
-    return ResponseEntity
-        .status(HttpStatus.CREATED)
-        .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
-        .body(ApiResponse.created(
-            SignupResponse.from(
-                authTokenDto.accessToken()
-            )
-        ));
   }
 }

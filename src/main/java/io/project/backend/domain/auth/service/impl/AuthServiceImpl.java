@@ -1,7 +1,9 @@
 package io.project.backend.domain.auth.service.impl;
 
 import io.project.backend.domain.auth.dto.common.AuthTokenDto;
+import io.project.backend.domain.auth.dto.request.LoginRequest;
 import io.project.backend.domain.auth.dto.request.SignupRequest;
+import io.project.backend.domain.auth.exception.AuthenticationException;
 import io.project.backend.domain.auth.repository.RefreshTokenRedisRepository;
 import io.project.backend.domain.auth.service.AuthService;
 import io.project.backend.domain.employee.entity.Department;
@@ -67,14 +69,47 @@ public class AuthServiceImpl implements AuthService {
         department
     );
 
-    Employee saved = employeeRepository.save(employee);
+    return issueAuthTokens(employeeRepository.save(employee));
+  }
 
-    String accessToken = jwtProvider.generateAccessToken(saved);
-    String refreshToken = jwtProvider.generateRefreshToken(saved);
+  @Override
+  @Transactional
+  public AuthTokenDto login(LoginRequest loginRequest) {
+
+    // 직원 조회
+    String email = loginRequest.email();
+    Employee employee = employeeRepository.findByEmailAndDeletedFalse(email)
+        .orElseThrow(() -> new AuthenticationException(
+            Map.of("invalid", "이메일 또는 비밀번호가 잘못되었습니다.")
+        ));
+
+    // 비밀번호 검증
+    if (!passwordEncoder.matches(
+        loginRequest.password(),
+        employee.getPassword())
+    ) {
+      throw new AuthenticationException(
+          Map.of("invalid", "이메일 또는 비밀번호가 잘못되었습니다.")
+      );
+    }
+
+    return issueAuthTokens(employee);
+  }
+
+  /**
+   * 전달된 employee에 대해 새로운 인증 토큰(access token, refresh token)을 발급한다.
+   * refresh token은 Redis 저장소에 TTL과 함께 저장한다.
+   *
+   * @param employee 인증 토큰을 발급할 대상 employee
+   * @return 새로 발급된 access token과 refresh token을 담은 {@code AuthTokenDto}
+   */
+  private AuthTokenDto issueAuthTokens(Employee employee) {
+    String accessToken = jwtProvider.generateAccessToken(employee);
+    String refreshToken = jwtProvider.generateRefreshToken(employee);
     Duration refreshTokenTtl = Duration.ofMillis(jwtProperties.refreshTokenExpiration());
 
     refreshTokenRedisRepository.save(
-        saved.getId(),
+        employee.getId(),
         refreshToken,
         refreshTokenTtl
     );

@@ -12,4 +12,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
   long countByHireDate(LocalDate hireDate);
 
   Optional<Employee> findByEmail(String email);
+
+  Optional<Employee> findByEmailAndDeletedFalse(String email);
 }
