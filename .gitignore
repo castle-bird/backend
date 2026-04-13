@@ -42,9 +42,9 @@ application-dev.yaml
 application-prod.yaml
 
 ### AI ###
-### AI ###
 CLAUDE.md
 copilot-instructions.md
+AGENTS.md
 
 ### Files ###
 .log/
