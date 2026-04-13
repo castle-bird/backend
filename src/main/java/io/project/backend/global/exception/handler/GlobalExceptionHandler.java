@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -28,9 +29,11 @@ public class GlobalExceptionHandler {
   ) {
     log.error("[GlobalException] - Message: {}", e.getMessage(), e);
 
-    ErrorResponse errorResponse = e.getDetails().isEmpty()
-        ? ErrorResponse.of(e.getErrorCode(), request.getRequestURI())
-        : ErrorResponse.of(e.getErrorCode(), request.getRequestURI(), e.getDetails());
+    ErrorResponse errorResponse = ErrorResponse.of(
+        e.getErrorCode(),
+        request.getRequestURI(),
+        e.getDetails()
+    );
 
     return ResponseEntity
         .status(e.getErrorCode().getStatus())
@@ -66,6 +69,25 @@ public class GlobalExceptionHandler {
         .body(errorResponse);
   }
 
+  /** JSON 파싱/바인딩 실패 (예: enum 값 불일치) */
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(
+      HttpMessageNotReadableException e,
+      HttpServletRequest request
+  ) {
+    log.error("[HttpMessageNotReadableException] - Message: {}", e.getMessage());
+
+    ErrorResponse errorResponse = ErrorResponse.of(
+        ErrorCode.INVALID_INPUT_VALUE,
+        request.getRequestURI(),
+        Map.of("request", "요청 본문 형식 또는 값이 올바르지 않습니다.")
+    );
+
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(errorResponse);
+  }
+
   /** 미처리 Exception */
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponse> handleGlobalException(
@@ -74,8 +96,11 @@ public class GlobalExceptionHandler {
   ) {
     log.error("[Exception] - Message: {}", e.getMessage(), e);
 
-    ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR,
-        request.getRequestURI());
+    ErrorResponse errorResponse = ErrorResponse.of(
+        ErrorCode.INTERNAL_SERVER_ERROR,
+        request.getRequestURI(),
+        Map.of("request", "예상치 못한 오류가 발생했습니다. 관리자에게 문의하세요.")
+    );
 
     return ResponseEntity
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
