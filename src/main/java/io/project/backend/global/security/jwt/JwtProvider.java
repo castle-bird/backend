@@ -87,7 +87,7 @@ public class JwtProvider {
    * @return 인코딩된 클레임과 서명을 포함하는 JWT 토큰 문자열
    */
   private String generateToken(Employee employee, TokenType tokenType) {
-    String subject = String.valueOf(employee.getId());
+    String subject = employee.getEmail();
     String tokenId = UUID.randomUUID().toString();
     String issuer = jwtProperties.jwtIssuer();
 

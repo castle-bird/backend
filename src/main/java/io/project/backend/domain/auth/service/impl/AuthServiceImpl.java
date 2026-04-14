@@ -161,6 +161,12 @@ public class AuthServiceImpl implements AuthService {
     return issueAuthTokens(employee);
   }
 
+  @Override
+  @Transactional
+  public void logout(Long userId) {
+    // Redis에서 refresh token 삭제 → 해당 토큰은 더 이상 사용할 수 없다.
+    refreshTokenRedisRepository.delete(userId);
+  }
 
   /**
    * 전달된 employee에 대해 새로운 인증 토큰(access token, refresh token)을 발급한다.

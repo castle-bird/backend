@@ -13,6 +13,10 @@ public class UserDetailsImpl implements UserDetails {
 
   private final Employee employee;
 
+  public Long getUserId() {
+    return employee.getId();
+  }
+
   @Override
   public String getUsername() {
     return employee.getEmail();

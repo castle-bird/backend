@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum TokenType {
-  ACCESS_TOKEN("access_token"),
-  REFRESH_TOKEN("refresh_token");
+  ACCESS_TOKEN("accessToken"),
+  REFRESH_TOKEN("refreshToken");
 
   private final String value;
 }
