@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -32,6 +34,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
+  private final Environment environment;
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -48,22 +51,32 @@ public class SecurityConfig {
 
   // 권한 경로 설정
   private Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry> authorizeCustomizer() {
-    return auth -> auth
-        .requestMatchers(HttpMethod.POST, "/auth/signup").permitAll()
-        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-        .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
-        .requestMatchers(HttpMethod.POST, "/auth/logout").authenticated()
-        .anyRequest().authenticated();
+    return auth -> {
+
+      if (environment.acceptsProfiles(Profiles.of("dev"))) {
+        auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll();
+      }
+
+      auth
+          .requestMatchers(HttpMethod.POST, "/auth/signup").permitAll()
+          .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+          .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
+          .requestMatchers(HttpMethod.POST, "/auth/logout").authenticated()
+          .anyRequest().authenticated();
+    };
   }
 
   // CORS
   private Customizer<CorsConfigurer<HttpSecurity>> corsCustomizer() {
     CorsConfiguration config = new CorsConfiguration();
 
-    config.setAllowedOrigins(List.of(
-        "http://localhost:8080",   // 서버 확인용
-        "http://localhost:5173"    // React (Vite)
-    ));
+    if (environment.acceptsProfiles(Profiles.of("dev"))) {
+      config.setAllowedOrigins(List.of(
+          "http://localhost:8080",   // 서버 확인용
+          "http://localhost:5173"    // React (Vite)
+      ));
+    }
+
     config.setAllowedMethods(List.of("*"));
     config.setAllowedHeaders(List.of("*"));
     config.setAllowCredentials(true);

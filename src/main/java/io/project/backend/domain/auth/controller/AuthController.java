@@ -1,5 +1,6 @@
 package io.project.backend.domain.auth.controller;
 
+import io.project.backend.domain.auth.controller.api.AuthControllerApi;
 import io.project.backend.domain.auth.dto.common.AuthTokenDto;
 import io.project.backend.domain.auth.dto.request.LoginRequest;
 import io.project.backend.domain.auth.dto.request.SignupRequest;
@@ -27,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthController implements AuthControllerApi {
 
   private final JwtProperties jwtProperties;
   private final AuthService authService;

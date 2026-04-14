@@ -16,6 +16,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 @Slf4j
@@ -85,6 +86,25 @@ public class GlobalExceptionHandler {
 
     return ResponseEntity
         .status(HttpStatus.BAD_REQUEST)
+        .body(errorResponse);
+  }
+
+  /** 존재하지 않는 정적 리소스 요청 */
+  @ExceptionHandler(NoResourceFoundException.class)
+  public ResponseEntity<ErrorResponse> handleNoResourceFoundException(
+      NoResourceFoundException e,
+      HttpServletRequest request
+  ) {
+    log.warn("[NoResourceFoundException] - URI: {}", request.getRequestURI());
+
+    ErrorResponse errorResponse = ErrorResponse.of(
+        ErrorCode.INTERNAL_SERVER_ERROR,
+        request.getRequestURI(),
+        Map.of("request", "요청한 리소스를 찾을 수 없습니다.")
+    );
+
+    return ResponseEntity
+        .status(HttpStatus.NOT_FOUND)
         .body(errorResponse);
   }
 
