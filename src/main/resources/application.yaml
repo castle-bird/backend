@@ -52,12 +52,6 @@ springdoc:
   api-docs:
     path: /v3/api-docs
 
-jwt:
-  secret: ${JWT_SECRET}
-  access-token-expiration: ${JWT_ACCESS_EXPIRATION_MS}
-  refresh-token-expiration: ${JWT_REFRESH_EXPIRATION_MS}
-
-
 # 커스텀
 app:
 
@@ -68,3 +62,9 @@ app:
       caches:
         userCache:
           ttl: 1800s
+
+  jwt:
+    secret-key: ${JWT_SECRET_KEY}
+    access-token-expiration: ${JWT_ACCESS_EXPIRATION_MS}
+    refresh-token-expiration: ${JWT_REFRESH_EXPIRATION_MS}
+    jwt-issuer: ${JWT_ISSUER}
