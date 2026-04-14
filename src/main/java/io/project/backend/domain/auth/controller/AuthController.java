@@ -10,15 +10,18 @@ import io.project.backend.global.security.jwt.JwtProperties;
 import jakarta.validation.Valid;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -52,6 +55,25 @@ public class AuthController {
   ) {
 
     AuthTokenDto authTokenDto = authService.login(loginRequest);
+
+    ResponseCookie responseCookie = createRefreshTokenCookie(authTokenDto.refreshToken());
+
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
+        .body(ApiResponse.ok(
+            AuthResponse.from(
+                authTokenDto.accessToken()
+            )
+        ));
+  }
+
+  @PostMapping("/refresh")
+  public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(
+      @CookieValue(name = "refreshToken", required = false) String refreshToken
+  ) {
+
+    AuthTokenDto authTokenDto = authService.refreshToken(refreshToken);
 
     ResponseCookie responseCookie = createRefreshTokenCookie(authTokenDto.refreshToken());
 

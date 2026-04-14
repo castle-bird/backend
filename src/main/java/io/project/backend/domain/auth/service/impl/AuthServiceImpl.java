@@ -1,9 +1,12 @@
 package io.project.backend.domain.auth.service.impl;
 
+import io.jsonwebtoken.Claims;
 import io.project.backend.domain.auth.dto.common.AuthTokenDto;
 import io.project.backend.domain.auth.dto.request.LoginRequest;
 import io.project.backend.domain.auth.dto.request.SignupRequest;
 import io.project.backend.domain.auth.exception.AuthenticationException;
+import io.project.backend.domain.auth.exception.InvalidTokenException;
+import io.project.backend.domain.auth.exception.TokenReuseDetectedException;
 import io.project.backend.domain.auth.repository.RefreshTokenRedisRepository;
 import io.project.backend.domain.auth.service.AuthService;
 import io.project.backend.domain.employee.entity.Department;
@@ -15,6 +18,7 @@ import io.project.backend.domain.employee.repository.DepartmentRepository;
 import io.project.backend.domain.employee.repository.EmployeeRepository;
 import io.project.backend.global.security.jwt.JwtProperties;
 import io.project.backend.global.security.jwt.JwtProvider;
+import io.project.backend.global.security.jwt.TokenType;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -95,6 +99,68 @@ public class AuthServiceImpl implements AuthService {
 
     return issueAuthTokens(employee);
   }
+
+  @Override
+  @Transactional
+  public AuthTokenDto refreshToken(String refreshToken) {
+    // 토큰 존재 여부
+    if (refreshToken == null || refreshToken.isBlank()) {
+      throw new InvalidTokenException(
+          Map.of("refreshToken", "refresh token이 없습니다.")
+      );
+    }
+
+    // 토큰 파싱:
+    // jjwt 0.13.0 기준 → 이 단계에서 서명검증, 유효기간 검증이 모두 이루어진다.
+    // (예외 발생 시, 토큰이 유효하지 않거나 만료된 것이다.)
+    Claims claims = jwtProvider.extractClaims(refreshToken);
+    Long userId = Long.valueOf(claims.getSubject());
+    String type = claims.get("type", String.class);
+    String issuer = claims.getIssuer();
+
+    // 타입 검증
+    if (!TokenType.REFRESH_TOKEN.getValue().equals(type)) {
+      throw new InvalidTokenException(
+          Map.of("refreshToken", "refresh token이 아닙니다.")
+      );
+    }
+
+    // 발행자 검증
+    if (!jwtProperties.jwtIssuer().equals(issuer)) {
+      throw new InvalidTokenException(
+          Map.of("refreshToken", "issuer가 올바르지 않습니다.")
+      );
+    }
+
+    // 토큰 조회
+    String savedRefreshToken = refreshTokenRedisRepository.findByUserId(userId);
+    if (savedRefreshToken == null) {
+      throw new InvalidTokenException(
+          Map.of("refreshToken", "저장된 refresh token이 없습니다.")
+      );
+    }
+
+    // 토큰 재사용 감지:
+    // 토큰의 사용자가 같은데, 토큰이 다른다?
+    // → 이전 토큰이 탈취되어 재사용되고 있을 가능성이 있다.
+    // → 사용자가 다른 기기에서 로그인하여 토큰이 갱신되었을 수 있다.
+    if (!savedRefreshToken.equals(refreshToken)) {
+      refreshTokenRedisRepository.delete(userId);
+      throw new TokenReuseDetectedException(
+          Map.of("refreshToken", "토큰 재사용이 감지되었습니다.")
+      );
+    }
+
+    // 사용자 조회:
+    // 토큰이 유효하다고 해도, 해당 사용자가 존재하지 않을 수 있다. (예: 탈퇴한 사용자)
+    Employee employee = employeeRepository.findByIdAndDeletedFalse(userId)
+        .orElseThrow(() -> new InvalidTokenException(
+            Map.of("refreshToken", "토큰에 해당하는 사용자가 없습니다.")
+        ));
+
+    return issueAuthTokens(employee);
+  }
+
 
   /**
    * 전달된 employee에 대해 새로운 인증 토큰(access token, refresh token)을 발급한다.

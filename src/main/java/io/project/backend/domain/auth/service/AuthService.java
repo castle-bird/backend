@@ -8,5 +8,7 @@ public interface AuthService {
 
   AuthTokenDto signup(SignupRequest request);
 
-  AuthTokenDto login(LoginRequest loginRequest);
+  AuthTokenDto login(LoginRequest request);
+
+  AuthTokenDto refreshToken(String refreshToken);
 }
