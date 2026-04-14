@@ -47,8 +47,8 @@ public class JwtProvider {
     }
   }
 
-  public Long extractUserId(String token) {
-    return Long.valueOf(extractClaims(token).getSubject());
+  public String extractEmail(String token) {
+    return extractClaims(token).getSubject();
   }
 
   public String extractRole(String token) {

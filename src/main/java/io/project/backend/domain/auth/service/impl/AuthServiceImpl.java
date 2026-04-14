@@ -114,7 +114,7 @@ public class AuthServiceImpl implements AuthService {
     // jjwt 0.13.0 기준 → 이 단계에서 서명검증, 유효기간 검증이 모두 이루어진다.
     // (예외 발생 시, 토큰이 유효하지 않거나 만료된 것이다.)
     Claims claims = jwtProvider.extractClaims(refreshToken);
-    Long userId = Long.valueOf(claims.getSubject());
+    String email = claims.getSubject();
     String type = claims.get("type", String.class);
     String issuer = claims.getIssuer();
 
@@ -132,8 +132,15 @@ public class AuthServiceImpl implements AuthService {
       );
     }
 
+    // 사용자 조회:
+    // 토큰이 유효하다고 해도, 해당 사용자가 존재하지 않을 수 있다. (예: 탈퇴한 사용자)
+    Employee employee = employeeRepository.findByEmailAndDeletedFalse(email)
+        .orElseThrow(() -> new InvalidTokenException(
+            Map.of("refreshToken", "토큰에 해당하는 사용자가 없습니다.")
+        ));
+
     // 토큰 조회
-    String savedRefreshToken = refreshTokenRedisRepository.findByUserId(userId);
+    String savedRefreshToken = refreshTokenRedisRepository.findByUserId(employee.getId());
     if (savedRefreshToken == null) {
       throw new InvalidTokenException(
           Map.of("refreshToken", "저장된 refresh token이 없습니다.")
@@ -145,18 +152,11 @@ public class AuthServiceImpl implements AuthService {
     // → 이전 토큰이 탈취되어 재사용되고 있을 가능성이 있다.
     // → 사용자가 다른 기기에서 로그인하여 토큰이 갱신되었을 수 있다.
     if (!savedRefreshToken.equals(refreshToken)) {
-      refreshTokenRedisRepository.delete(userId);
+      refreshTokenRedisRepository.delete(employee.getId());
       throw new TokenReuseDetectedException(
           Map.of("refreshToken", "토큰 재사용이 감지되었습니다.")
       );
     }
-
-    // 사용자 조회:
-    // 토큰이 유효하다고 해도, 해당 사용자가 존재하지 않을 수 있다. (예: 탈퇴한 사용자)
-    Employee employee = employeeRepository.findByIdAndDeletedFalse(userId)
-        .orElseThrow(() -> new InvalidTokenException(
-            Map.of("refreshToken", "토큰에 해당하는 사용자가 없습니다.")
-        ));
 
     return issueAuthTokens(employee);
   }

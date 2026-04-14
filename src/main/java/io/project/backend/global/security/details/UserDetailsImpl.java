@@ -29,7 +29,7 @@ public class UserDetailsImpl implements UserDetails {
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return List.of(new SimpleGrantedAuthority("ROLE" + employee.getRole()));
+    return List.of(new SimpleGrantedAuthority("ROLE_" + employee.getRole()));
   }
 
   // 계정 만료 여부. e.g. 장기 미접속 등
