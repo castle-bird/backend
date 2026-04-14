@@ -1,4 +1,4 @@
-[![codecov](https://codecov.io/gh/castle-bird/backend/graph/badge.svg?token=IW9WHKXOXQ)](https://codecov.io/gh/castle-bird/backend)
+﻿[![codecov](https://codecov.io/gh/castle-bird/backend/graph/badge.svg?token=IW9WHKXOXQ)](https://codecov.io/gh/castle-bird/backend)
 ![Java](https://img.shields.io/badge/Java-17-007396?logo=openjdk)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?logo=springboot)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql)
@@ -14,7 +14,7 @@
 
 - [주요 기능](#주요-기능)
 - [기술 스택](#기술-스택)
-- [도메인 구조](#도메인-구조)
+- [프로젝트 구조](#프로젝트-구조)
 - [주요 설계 결정](#주요-설계-결정)
 - [인증/인가 플로우](#인증인가-플로우)
 
@@ -22,14 +22,14 @@
 
 ## 주요 기능
 
-| 도메인                   | 기능                                       |
+| 도메인 | 기능 |
 |-----------------------|------------------------------------------|
-| **인증 (Auth)**         | JWT 로그인, Refresh Token 발급, 갱신, 폐기        |
-| **직원 (Employee)**     | 직원 등록, 조회, 수정, Soft Delete, 부서 배정, 직급 변경 |
-| **부서 (Department)**   | 부서 생성, 조회, 상태 유지                         |
-| **급여 (Salary)**       | 기본급, 수당, 보너스 등록 및 수정                     |
-| **예약 (Reservation)**  | 회의실 등록, 예약 생성 및 취소, 중복 예약 방지             |
-| **알림 (Notification)** | 예약 취소, 급여 변경, 조직 변경, 공지 알림               |
+| **인증 (Auth)** | JWT 로그인, Refresh Token 발급, 갱신, 폐기 |
+| **직원 (Employee)** | 직원 등록, 조회, 수정, Soft Delete, 부서 배정, 직급 변경 |
+| **부서 (Department)** | 부서 생성, 조회, 상태 유지 |
+| **급여 (Salary)** | 기본급 설정, 보너스 등록 및 수정 |
+| **예약 (Reservation)** | 회의실 등록, 예약 생성 및 취소, 중복 예약 방지 |
+| **알림 (Notification)** | 예약 취소, 급여 변경, 조직 변경 공지 알림 |
 
 ---
 
@@ -61,7 +61,7 @@
 
 ---
 
-## 도메인 구조
+## 프로젝트 구조
 
 Layered Architecture를 기반으로 도메인별 패키지를 구성했습니다.
 
@@ -88,7 +88,8 @@ src/main/java/io/project/backend/
 
 - **Soft Delete**: `employees` 테이블의 `is_deleted`, `deleted_at` 컬럼으로 논리 삭제를 처리합니다.
 - **중복 예약 방지**: PostgreSQL 제약 조건과 애플리케이션 레벨 검증을 함께 사용합니다.
-- **Redis 사용**: Refresh Token 저장과 캐시 관리를 Redis로 처리합니다.
+- **Redis 사용**: Refresh Token 저장과 캐시 관리를 Redis로 처리합니다. 또한 사용자별 최대 3개 세션을 허용하는 로직을 Redis ZSet으로 구현하여 효율적으로 관리합니다.
+- **멀티 세션 Refresh Token 관리**: 사용자당 최대 3개의 Refresh Token 세션을 허용하며, 초과 시 가장 오래된 세션을 제거합니다.
 - **배치 최적화**: JDBC batch 옵션과 fetch size 설정으로 대량 처리 성능을 보완합니다.
 
 ---
@@ -96,62 +97,71 @@ src/main/java/io/project/backend/
 ## 인증/인가 플로우
 
 ### 회원가입
+1. 클라이언트가 `POST /auth/signup`으로 회원 정보를 전달합니다.
+2. Controller에서 요청 유효성을 검증한 뒤 Service에 회원가입을 위임합니다.
+3. Service에서 이메일/부서 등 필수 조건을 확인하고 비밀번호를 `BCryptPasswordEncoder`로 암호화합니다.
+4. 사용자 저장 후 Access Token과 Refresh Token을 발급합니다.
+5. Refresh Token은 Redis에 저장하고, Access Token은 응답 바디로 반환합니다.
 
-1. 클라이언트가 `POST /auth/signup` 요청을 보냅니다.
-2. `AuthController.signup()`
-    - 요청 본문을 `SignupRequest`로 받습니다.
-    - `@Valid`로 기본 유효성을 검증합니다.
-    - 회원가입 처리를 `AuthService.signup()`에 위임합니다.
-3. `AuthServiceImpl.signup()`
-    - 이메일 중복 여부를 확인합니다.
-    - 부서 존재 여부를 확인합니다.
-    - 입사일 기준 사번을 생성합니다.
-    - 비밀번호를 암호화합니다.
-    - `Employee` 엔티티를 생성하고 저장합니다.
-    - `JwtProvider`로 Access Token과 Refresh Token을 생성합니다.
-    - `RefreshTokenRedisRepository`를 통해 Refresh Token을 Redis에 저장합니다.
-4. `JwtProvider`
-    - 사용자 ID를 기준으로 JWT를 생성합니다.
-    - Access Token에는 권한 정보를 포함합니다.
-    - Refresh Token은 재발급용 최소 정보만 담아 생성합니다.
-5. `RefreshTokenRedisRepository`
-    - Redis에 Refresh Token을 저장합니다.
-    - 현재 구현 기준 키 형식은 `refresh_token:{userId}` 입니다.
-    - TTL은 Refresh Token 만료 시간과 동일하게 설정합니다.
-6. `AuthController.signup()`
-    - Access Token은 응답 바디(`AuthResponse`)로 반환합니다.
-    - Refresh Token은 `HttpOnly Cookie`로 반환합니다.
-    - 응답 상태 코드는 `201 Created`입니다.
-7. 클라이언트는 Access Token과 Refresh Token을 받아 인증 상태를 유지합니다.
-
-### 흐름 요약
-
+#### 흐름요약
 ```text
-Client
-  -> AuthController.signup()
-  -> AuthServiceImpl.signup()
-      -> EmployeeRepository / DepartmentRepository
-      -> JwtProvider
-      -> RefreshTokenRedisRepository
-  -> AuthController
-Client
+Client -> AuthController.signup()
+       -> AuthService.signup()
+       -> EmployeeRepository / DepartmentRepository
+       -> JwtProvider + RefreshTokenRedisRepository
+       -> Response(Access Token + Refresh Token Cookie)
 ```
 
+---
+
 ### 로그인
+1. 클라이언트가 `POST /auth/login`으로 인증 정보를 전달합니다.
+2. Controller가 요청 형식을 검증하고 Service로 전달합니다.
+3. Service에서 사용자 조회 후 비밀번호를 검증합니다.
+4. 검증 성공 시 Access Token/Refresh Token을 재발급하고 Refresh Token을 Redis에 갱신 저장합니다.
+5. 실패 시 인증 오류를 반환하고 토큰은 발급하지 않습니다.
 
-로그인 플로우는 회원가입과 거의 유사하지만,
-기존 사용자 검증과 비밀번호 확인이 추가됩니다. 로그인 성공 시에도 Access Token과 Refresh Token이 발급되고 저장됩니다.
-
-거의 유사한 이유는 현재 회원가입 완료 → 즉시 로그인 상태로 전환되는 시나리오를 지원하기 때문입니다. 
-따라서 회원가입과 로그인 모두에서 동일한 토큰 발급 및 저장 로직이 재사용됩니다.
-
+#### 흐름요약
 ```text
-Client
-  -> AuthController.login()
-  -> AuthServiceImpl.login()
-      -> EmployeeRepository / PasswordEncoder
-      -> JwtProvider
-      -> RefreshTokenRedisRepository
-  -> AuthController
-Client
+Client -> AuthController.login()
+       -> AuthService.login()
+       -> EmployeeRepository + PasswordEncoder
+       -> JwtProvider + RefreshTokenRedisRepository
+       -> Response(Access Token + Refresh Token Cookie)
+```
+
+---
+
+### 토큰 갱신
+1. 클라이언트가 `POST /auth/refresh`를 호출하고 쿠키의 Refresh Token을 전달합니다.
+2. Controller가 Refresh Token을 추출해 Service에 전달합니다.
+3. Service가 토큰 서명/만료/타입/저장 상태를 확인합니다.
+4. 검증 완료 시 새 Access Token과 Refresh Token을 발급합니다.
+5. 기존 Refresh Token은 정리하고 새 Refresh Token을 Redis에 저장한 뒤 응답을 반환합니다.
+
+#### 흐름요약
+```text
+Client -> AuthController.refreshToken()
+       -> AuthService.refreshToken()
+       -> JwtProvider(검증/재발급)
+       -> RefreshTokenRedisRepository(교체 저장)
+       -> Response(새 Access Token + Refresh Token Cookie)
+```
+
+---
+
+### 로그아웃
+1. 인증된 사용자가 `POST /auth/logout`을 호출합니다.
+2. 인증 컨텍스트에서 사용자 정보를 확인합니다.
+3. Service가 Redis에 저장된 해당 사용자의 Refresh Token(또는 현재 세션 토큰)을 삭제합니다.
+4. 클라이언트 쿠키의 Refresh Token을 무효화합니다.
+5. 이후 토큰 갱신 요청은 실패하게 됩니다.
+
+#### 흐름요약
+```text
+Client -> JwtFilter(인증 확인)
+       -> AuthController.logout()
+       -> AuthService.logout()
+       -> RefreshTokenRedisRepository.delete(...)
+       -> Response(로그아웃 완료)
 ```
