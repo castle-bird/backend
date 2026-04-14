@@ -1,12 +1,13 @@
 package io.project.backend.domain.auth.repository;
 
 import java.time.Duration;
+import java.time.Instant;
 
 public interface RefreshTokenRedisRepository {
 
-  void save(Long userId, String refreshToken, Duration ttl);
+  void save(Long userId, String tokenId, String refreshToken, Instant issuedAt, Duration ttl);
 
-  String findByUserId(Long userId);
+  boolean exists(Long userId, String refreshToken);
 
-  void delete(Long userId);
+  void delete(Long userId, String refreshToken);
 }

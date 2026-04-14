@@ -91,11 +91,12 @@ public class AuthController {
 
   @PostMapping("/logout")
   public ResponseEntity<ApiResponse<Void>> logout(
-      @AuthenticationPrincipal UserDetailsImpl userDetails
+      @AuthenticationPrincipal UserDetailsImpl userDetails,
+      @CookieValue(name = "refreshToken", required = false) String refreshToken
   ) {
 
     // 서버에서 토큰 무효화
-    authService.logout(userDetails.getUserId());
+    authService.logout(userDetails.getUserId(), refreshToken);
 
     // 클라이언트에서 refresh token 삭제 (만료 시간 0으로 설정)
     ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")

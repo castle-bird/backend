@@ -6,7 +6,6 @@ import io.project.backend.domain.auth.dto.request.LoginRequest;
 import io.project.backend.domain.auth.dto.request.SignupRequest;
 import io.project.backend.domain.auth.exception.AuthenticationException;
 import io.project.backend.domain.auth.exception.InvalidTokenException;
-import io.project.backend.domain.auth.exception.TokenReuseDetectedException;
 import io.project.backend.domain.auth.repository.RefreshTokenRedisRepository;
 import io.project.backend.domain.auth.service.AuthService;
 import io.project.backend.domain.employee.entity.Department;
@@ -20,6 +19,7 @@ import io.project.backend.global.security.jwt.JwtProperties;
 import io.project.backend.global.security.jwt.JwtProvider;
 import io.project.backend.global.security.jwt.TokenType;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
@@ -140,32 +140,25 @@ public class AuthServiceImpl implements AuthService {
         ));
 
     // 토큰 조회
-    String savedRefreshToken = refreshTokenRedisRepository.findByUserId(employee.getId());
-    if (savedRefreshToken == null) {
+    if (!refreshTokenRedisRepository.exists(employee.getId(), refreshToken)) {
       throw new InvalidTokenException(
           Map.of("refreshToken", "저장된 refresh token이 없습니다.")
       );
     }
 
-    // 토큰 재사용 감지:
-    // 토큰의 사용자가 같은데, 토큰이 다른다?
-    // → 이전 토큰이 탈취되어 재사용되고 있을 가능성이 있다.
-    // → 사용자가 다른 기기에서 로그인하여 토큰이 갱신되었을 수 있다.
-    if (!savedRefreshToken.equals(refreshToken)) {
-      refreshTokenRedisRepository.delete(employee.getId());
-      throw new TokenReuseDetectedException(
-          Map.of("refreshToken", "토큰 재사용이 감지되었습니다.")
-      );
-    }
-
+    refreshTokenRedisRepository.delete(employee.getId(), refreshToken);
     return issueAuthTokens(employee);
   }
 
   @Override
   @Transactional
-  public void logout(Long userId) {
+  public void logout(Long userId, String refreshToken) {
+    if (refreshToken == null || refreshToken.isBlank()) {
+      return;
+    }
+
     // Redis에서 refresh token 삭제 → 해당 토큰은 더 이상 사용할 수 없다.
-    refreshTokenRedisRepository.delete(userId);
+    refreshTokenRedisRepository.delete(userId, refreshToken);
   }
 
   /**
@@ -180,9 +173,16 @@ public class AuthServiceImpl implements AuthService {
     String refreshToken = jwtProvider.generateRefreshToken(employee);
     Duration refreshTokenTtl = Duration.ofMillis(jwtProperties.refreshTokenExpiration());
 
+    Claims refreshTokenClaims = jwtProvider.extractClaims(refreshToken);
+    String tokenId = refreshTokenClaims.getId();
+    Instant issuedAt = refreshTokenClaims.getIssuedAt().toInstant();
+
+    // 레디스 저장
     refreshTokenRedisRepository.save(
         employee.getId(),
+        tokenId,
         refreshToken,
+        issuedAt,
         refreshTokenTtl
     );
 

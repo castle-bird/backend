@@ -12,5 +12,5 @@ public interface AuthService {
 
   AuthTokenDto refreshToken(String refreshToken);
 
-  void logout(Long userId);
+  void logout(Long userId, String refreshToken);
 }
