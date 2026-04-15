@@ -14,7 +14,6 @@ public interface EmployeeMapper {
   @Mapping(target = "name",           source = "signupRequest.name")
   @Mapping(target = "email",          source = "signupRequest.email")
   @Mapping(target = "password",       source = "encodedPassword")
-  @Mapping(target = "role",           source = "signupRequest.role")
   @Mapping(target = "position",       source = "signupRequest.position")
   @Mapping(target = "hireDate",       source = "hireDate")
   @Mapping(target = "department",     source = "department")
