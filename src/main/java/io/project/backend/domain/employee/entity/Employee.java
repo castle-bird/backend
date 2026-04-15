@@ -62,7 +62,6 @@ public class Employee extends BaseTimeEntity {
       String name,
       String email,
       String password,
-      EmployeeRole role,
       String position,
       Department department,
       LocalDate hireDate
@@ -71,7 +70,7 @@ public class Employee extends BaseTimeEntity {
     this.name = name;
     this.email = email;
     this.password = password;
-    this.role = role != null ? role : EmployeeRole.EMPLOYEE;
+    this.role = EmployeeRole.EMPLOYEE;
     this.position = position;
     this.department = department;
     this.hireDate = hireDate;
@@ -93,5 +92,9 @@ public class Employee extends BaseTimeEntity {
 
   public void updatePosition(String position) {
     this.position = position;
+  }
+
+  public void changeRole(EmployeeRole role) {
+    this.role = role;
   }
 }
