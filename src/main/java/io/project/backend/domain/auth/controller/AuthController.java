@@ -6,7 +6,7 @@ import io.project.backend.domain.auth.dto.request.LoginRequest;
 import io.project.backend.domain.auth.dto.request.SignupRequest;
 import io.project.backend.domain.auth.dto.response.AuthResponse;
 import io.project.backend.domain.auth.service.AuthService;
-import io.project.backend.global.response.ApiResponse;
+import io.project.backend.global.response.CommonApiResponse;
 import io.project.backend.global.security.details.UserDetailsImpl;
 import io.project.backend.global.security.jwt.JwtProperties;
 import jakarta.validation.Valid;
@@ -34,7 +34,7 @@ public class AuthController implements AuthControllerApi {
   private final AuthService authService;
 
   @PostMapping("/signup")
-  public ResponseEntity<ApiResponse<AuthResponse>> signup(
+  public ResponseEntity<CommonApiResponse<AuthResponse>> signup(
       @Valid @RequestBody SignupRequest signupRequest
   ) {
 
@@ -45,7 +45,7 @@ public class AuthController implements AuthControllerApi {
     return ResponseEntity
         .status(HttpStatus.CREATED)
         .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
-        .body(ApiResponse.created(
+        .body(CommonApiResponse.created(
             AuthResponse.from(
                 authTokenDto.accessToken()
             )
@@ -53,7 +53,7 @@ public class AuthController implements AuthControllerApi {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<ApiResponse<AuthResponse>> login(
+  public ResponseEntity<CommonApiResponse<AuthResponse>> login(
       @Valid @RequestBody LoginRequest loginRequest
   ) {
 
@@ -64,7 +64,7 @@ public class AuthController implements AuthControllerApi {
     return ResponseEntity
         .status(HttpStatus.OK)
         .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
-        .body(ApiResponse.ok(
+        .body(CommonApiResponse.ok(
             AuthResponse.from(
                 authTokenDto.accessToken()
             )
@@ -72,7 +72,7 @@ public class AuthController implements AuthControllerApi {
   }
 
   @PostMapping("/refresh")
-  public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(
+  public ResponseEntity<CommonApiResponse<AuthResponse>> refreshToken(
       @CookieValue(name = "refreshToken", required = false) String refreshToken
   ) {
 
@@ -83,7 +83,7 @@ public class AuthController implements AuthControllerApi {
     return ResponseEntity
         .status(HttpStatus.OK)
         .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
-        .body(ApiResponse.ok(
+        .body(CommonApiResponse.ok(
             AuthResponse.from(
                 authTokenDto.accessToken()
             )
@@ -91,7 +91,7 @@ public class AuthController implements AuthControllerApi {
   }
 
   @PostMapping("/logout")
-  public ResponseEntity<ApiResponse<Void>> logout(
+  public ResponseEntity<CommonApiResponse<Void>> logout(
       @AuthenticationPrincipal UserDetailsImpl userDetails,
       @CookieValue(name = "refreshToken", required = false) String refreshToken
   ) {
@@ -111,7 +111,7 @@ public class AuthController implements AuthControllerApi {
     return ResponseEntity
         .status(HttpStatus.OK)
         .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
-        .body(ApiResponse.ok(null));
+        .body(CommonApiResponse.ok(null));
   }
 
   /**
