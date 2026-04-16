@@ -1,5 +1,6 @@
 package io.project.backend.domain.employee.controller.api;
 
+import io.project.backend.domain.employee.dto.request.UpdateEmployeeRequest;
 import io.project.backend.domain.employee.dto.response.DepartmentListResponse;
 import io.project.backend.domain.employee.dto.response.PositionListResponse;
 import io.project.backend.global.response.CommonApiResponse;
@@ -30,10 +31,19 @@ public interface EmployeeControllerApi {
 
   @Operation(summary = "직원 삭제", description = "직원을 Soft Delete로 삭제합니다.")
   @ApiResponses({
-      @ApiResponse(responseCode = "204", description = "삭제 성공"),
+      @ApiResponse(responseCode = "200", description = "삭제 성공"),
       @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content),
       @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content),
       @ApiResponse(responseCode = "404", description = "직원 없음", content = @Content)
   })
   ResponseEntity<CommonApiResponse<Void>> deleteEmployee(Long id);
+
+  @Operation(summary = "직원 업데이트", description = "직원의 정보를 업데이트합니다.")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "수정 성공"),
+      @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content),
+      @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content),
+      @ApiResponse(responseCode = "404", description = "직원 없음", content = @Content)
+  })
+  ResponseEntity<CommonApiResponse<Void>> updateEmployee(Long id, UpdateEmployeeRequest request);
 }

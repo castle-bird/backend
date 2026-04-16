@@ -1,5 +1,6 @@
 package io.project.backend.domain.employee.entity;
 
+import io.project.backend.domain.employee.dto.request.UpdateEmployeeRequest;
 import io.project.backend.global.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -117,5 +118,19 @@ public class Employee extends BaseTimeEntity {
 
   public void changeRole(EmployeeRole role) {
     this.role = role;
+  }
+
+  public void updateAllInfo(
+      UpdateEmployeeRequest request,
+      Department department,
+      EmployeePosition employeePosition
+  ) {
+    this.name = request.name();
+    this.email = request.email();
+    this.role = request.role();
+    this.address = request.address();
+    this.phone = request.phone();
+    this.department = department;
+    this.employeePosition = employeePosition;
   }
 }

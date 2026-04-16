@@ -3,7 +3,12 @@ package io.project.backend.domain.employee.service.impl;
 import io.project.backend.domain.auth.repository.RefreshTokenRedisRepository;
 import io.project.backend.domain.employee.dto.common.DepartmentListDto;
 import io.project.backend.domain.employee.dto.common.PositionListDto;
+import io.project.backend.domain.employee.dto.request.UpdateEmployeeRequest;
+import io.project.backend.domain.employee.entity.Department;
 import io.project.backend.domain.employee.entity.Employee;
+import io.project.backend.domain.employee.entity.EmployeePosition;
+import io.project.backend.domain.employee.exception.DepartmentNotFoundException;
+import io.project.backend.domain.employee.exception.EmployeeDuplicateException;
 import io.project.backend.domain.employee.exception.EmployeeNotFoundException;
 import io.project.backend.domain.employee.repository.DepartmentRepository;
 import io.project.backend.domain.employee.repository.EmployeePositionRepository;
@@ -51,5 +56,40 @@ public class EmployeeServiceImpl implements EmployeeService {
     refreshTokenRedisRepository.deleteAllByUserId(employee.getId());
 
     employee.softDelete();
+  }
+
+  @Override
+  @Transactional
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  public void updateEmployee(Long id, UpdateEmployeeRequest request) {
+
+    Employee employee = employeeRepository.findByIdAndDeletedFalse(id)
+        .orElseThrow(() -> new EmployeeNotFoundException(Map.of("userId", id)));
+
+    // 이메일 중복 체크 (현재 이메일과 다르면서, 이미 존재하는 이메일인 경우)
+    if (!employee.getEmail().equals(request.email())
+        && employeeRepository.existsByEmail(request.email())) {
+      throw new EmployeeDuplicateException(Map.of("email", request.email()));
+    }
+
+    // 부서 및 직급 존재 여부 체크
+    Department department = departmentRepository.findByName(request.department())
+        .orElseThrow(
+            () -> new DepartmentNotFoundException(Map.of("departmentName", request.department())));
+
+    EmployeePosition employeePosition = employeePositionRepository.findByName(
+            request.employeePosition())
+        .orElseThrow(() -> new EmployeeNotFoundException(
+            Map.of("employeePositionName", request.employeePosition())));
+
+    // 직원 정보 업데이트
+    employee.updateAllInfo(
+        request,
+        department,
+        employeePosition
+    );
+
+    // 변경된 직원 정보 저장
+    employeeRepository.save(employee);
   }
 }
