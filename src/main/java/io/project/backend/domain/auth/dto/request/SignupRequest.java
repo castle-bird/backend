@@ -1,8 +1,9 @@
 package io.project.backend.domain.auth.dto.request;
 
+import io.project.backend.domain.employee.entity.EmployeeRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record SignupRequest(
@@ -16,11 +17,8 @@ public record SignupRequest(
     @Size(max = 100, message = "이메일은 100자 이하여야 합니다.")
     String email,
 
-    @NotBlank(message = "비밀번호는 필수 입력값입니다.")
-    @Size(min = 8, max = 255, message = "비밀번호는 8자 이상 255자 이하여야 합니다.")
-    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]+$",
-        message = "비밀번호는 영문자, 숫자, 특수문자를 모두 포함해야 합니다.")
-    String password,
+    @NotNull(message = "권한은 필수 입력값입니다.")
+    EmployeeRole role,
 
     @NotBlank(message = "직급은 필수 입력값입니다.")
     @Size(max = 50, message = "직급은 50자 이하여야 합니다.")

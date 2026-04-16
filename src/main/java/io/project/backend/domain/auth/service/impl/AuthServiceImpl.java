@@ -4,6 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.project.backend.domain.auth.dto.common.AuthTokenDto;
 import io.project.backend.domain.auth.dto.request.LoginRequest;
 import io.project.backend.domain.auth.dto.request.SignupRequest;
+import io.project.backend.domain.auth.dto.common.LoginDto;
+import io.project.backend.domain.auth.dto.response.SignupResponse;
 import io.project.backend.domain.auth.exception.AuthenticationException;
 import io.project.backend.domain.auth.exception.InvalidTokenException;
 import io.project.backend.domain.auth.repository.RefreshTokenRedisRepository;
@@ -18,6 +20,7 @@ import io.project.backend.domain.employee.repository.EmployeeRepository;
 import io.project.backend.global.security.jwt.JwtProperties;
 import io.project.backend.global.security.jwt.JwtProvider;
 import io.project.backend.global.security.jwt.TokenType;
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -44,7 +47,7 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   @Transactional
-  public AuthTokenDto signup(SignupRequest request) {
+  public SignupResponse createEmployee(SignupRequest request) {
 
     // 이메일 중복 체크
     String email = request.email();
@@ -64,21 +67,27 @@ public class AuthServiceImpl implements AuthService {
     String employeeNumber = today.format(DateTimeFormatter.ofPattern("yyMMdd"))
                             + String.format("%02d", hireDateCount);
 
+    // 비번 임시 생성 → 첫 로그인시 변경 해야함
+    String temporaryPassword = generateTemporaryPassword();
+    String encodedPassword = passwordEncoder.encode(temporaryPassword);
+
     // 사원 생성 및 저장
     Employee employee = employeeMapper.toEntityForSignup(
         request,
-        passwordEncoder.encode(request.password()),
+        encodedPassword,
         employeeNumber,
         today,
         department
     );
 
-    return issueAuthTokens(employeeRepository.save(employee));
+    employeeRepository.save(employee);
+
+    return SignupResponse.form(employee.getEmail(), temporaryPassword);
   }
 
   @Override
   @Transactional
-  public AuthTokenDto login(LoginRequest loginRequest) {
+  public LoginDto login(LoginRequest loginRequest) {
 
     // 직원 조회
     String email = loginRequest.email();
@@ -97,7 +106,12 @@ public class AuthServiceImpl implements AuthService {
       );
     }
 
-    return issueAuthTokens(employee);
+    // 최초 접속 확인
+    boolean passwordChangeRequired = employee.isPasswordChangeRequired();
+
+    AuthTokenDto tokens = issueAuthTokens(employee);
+
+    return LoginDto.from(tokens, passwordChangeRequired);
   }
 
   @Override
@@ -159,6 +173,42 @@ public class AuthServiceImpl implements AuthService {
 
     // Redis에서 refresh token 삭제 → 해당 토큰은 더 이상 사용할 수 없다.
     refreshTokenRedisRepository.delete(userId, refreshToken);
+  }
+
+  /**
+   * 영문자·숫자·특수문자(@$!%*#?&)를 각 1자 이상 포함한 12자리 임시 비밀번호를 생성한다.
+   *
+   * @return 패턴 제약을 만족하는 임시 비밀번호 문자열
+   */
+  private String generateTemporaryPassword() {
+    final String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    final String digits = "0123456789";
+    final String specials = "@$!%*#?&";
+    final String allChars = letters + digits + specials;
+
+    SecureRandom random = new SecureRandom();
+    char[] password = new char[12];
+
+    // 각 유형 최소 1자 보장
+    password[0] = letters.charAt(random.nextInt(letters.length()));
+    password[1] = digits.charAt(random.nextInt(digits.length()));
+    password[2] = specials.charAt(random.nextInt(specials.length()));
+
+    // 나머지 채우기
+    for (int i = 3; i < password.length; i++) {
+      password[i] = allChars.charAt(random.nextInt(allChars.length()));
+    }
+
+    // 섞기
+    for (int i = password.length - 1; i > 0; i--) {
+      int j = random.nextInt(i + 1); // +1 해야 자기 포함
+      char tmp = password[i];
+
+      password[i] = password[j];
+      password[j] = tmp;
+    }
+
+    return new String(password);
   }
 
   /**

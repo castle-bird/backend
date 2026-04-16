@@ -43,7 +43,7 @@ application-prod.yaml
 
 ### AI ###
 CLAUDE.md
-copilot-instructions.md
+.claude/*
 AGENTS.md
 
 ### Files ###

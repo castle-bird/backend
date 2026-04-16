@@ -2,9 +2,12 @@ package io.project.backend.domain.auth.controller;
 
 import io.project.backend.domain.auth.controller.api.AuthControllerApi;
 import io.project.backend.domain.auth.dto.common.AuthTokenDto;
+import io.project.backend.domain.auth.dto.common.LoginDto;
 import io.project.backend.domain.auth.dto.request.LoginRequest;
 import io.project.backend.domain.auth.dto.request.SignupRequest;
 import io.project.backend.domain.auth.dto.response.AuthResponse;
+import io.project.backend.domain.auth.dto.response.LoginResponse;
+import io.project.backend.domain.auth.dto.response.SignupResponse;
 import io.project.backend.domain.auth.service.AuthService;
 import io.project.backend.global.response.CommonApiResponse;
 import io.project.backend.global.security.details.UserDetailsImpl;
@@ -34,39 +37,33 @@ public class AuthController implements AuthControllerApi {
   private final AuthService authService;
 
   @PostMapping("/signup")
-  public ResponseEntity<CommonApiResponse<AuthResponse>> signup(
+  public ResponseEntity<CommonApiResponse<SignupResponse>> createEmployee(
       @Valid @RequestBody SignupRequest signupRequest
   ) {
 
-    AuthTokenDto authTokenDto = authService.signup(signupRequest);
-
-    ResponseCookie responseCookie = createRefreshTokenCookie(authTokenDto.refreshToken());
+    SignupResponse response = authService.createEmployee(signupRequest);
 
     return ResponseEntity
         .status(HttpStatus.CREATED)
-        .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
-        .body(CommonApiResponse.created(
-            AuthResponse.from(
-                authTokenDto.accessToken()
-            )
-        ));
+        .body(CommonApiResponse.created(response));
   }
 
   @PostMapping("/login")
-  public ResponseEntity<CommonApiResponse<AuthResponse>> login(
+  public ResponseEntity<CommonApiResponse<LoginResponse>> login(
       @Valid @RequestBody LoginRequest loginRequest
   ) {
 
-    AuthTokenDto authTokenDto = authService.login(loginRequest);
+    LoginDto loginDto = authService.login(loginRequest);
 
-    ResponseCookie responseCookie = createRefreshTokenCookie(authTokenDto.refreshToken());
+    ResponseCookie responseCookie = createRefreshTokenCookie(loginDto.tokens().refreshToken());
 
     return ResponseEntity
         .status(HttpStatus.OK)
         .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
         .body(CommonApiResponse.ok(
-            AuthResponse.from(
-                authTokenDto.accessToken()
+            LoginResponse.from(
+                loginDto.tokens().accessToken(),
+                loginDto.passwordChangeRequired()
             )
         ));
   }
