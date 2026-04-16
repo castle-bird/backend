@@ -2,6 +2,7 @@ package io.project.backend.domain.auth.controller.api;
 
 
 import io.project.backend.domain.auth.dto.request.LoginRequest;
+import io.project.backend.domain.auth.dto.request.PasswordChangeRequest;
 import io.project.backend.domain.auth.dto.request.SignupRequest;
 import io.project.backend.domain.auth.dto.response.AuthResponse;
 import io.project.backend.domain.auth.dto.response.LoginResponse;
@@ -49,6 +50,16 @@ public interface AuthControllerApi {
       @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content)
   })
   ResponseEntity<CommonApiResponse<Void>> logout(UserDetailsImpl userDetails, String refreshToken);
+
+  @Operation(summary = "비밀번호 변경", description = "사용자의 비밀번호를 변경합니다.")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "비밀번호 변경 성공"),
+      @ApiResponse(responseCode = "400", description = "요청 값 검증 실패", content = @Content),
+      @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content)
+  })
+  ResponseEntity<CommonApiResponse<Void>> passwordChange(
+      UserDetailsImpl userDetails,
+      PasswordChangeRequest passwordChangeRequest);
 }
 
 

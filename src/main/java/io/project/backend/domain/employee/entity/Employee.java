@@ -40,17 +40,22 @@ public class Employee extends BaseTimeEntity {
   @ColumnTransformer(read = "role::text", write = "?::employee_role")
   private EmployeeRole role;
 
-  // 첫 로그인시 비번 강제 초기화를 위함
   @Column(name = "password_change_required", nullable = false)
   boolean passwordChangeRequired = true;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "position_id",nullable = false)
+  @JoinColumn(name = "position_id", nullable = false)
   private EmployeePosition employeePosition;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "department_id")
   private Department department;
+
+  @Column(name = "address", nullable = false, length = 255)
+  private String address;
+
+  @Column(name = "phone", nullable = false, length = 20)
+  private String phone;
 
   @Column(name = "hire_date")
   private LocalDate hireDate;
@@ -70,6 +75,8 @@ public class Employee extends BaseTimeEntity {
       EmployeeRole role,
       EmployeePosition employeePosition,
       Department department,
+      String address,
+      String phone,
       LocalDate hireDate
   ) {
     this.employeeNumber = employeeNumber;
@@ -79,6 +86,8 @@ public class Employee extends BaseTimeEntity {
     this.role = role;
     this.employeePosition = employeePosition;
     this.department = department;
+    this.address = address;
+    this.phone = phone;
     this.hireDate = hireDate;
     this.deleted = false;
   }
@@ -99,6 +108,11 @@ public class Employee extends BaseTimeEntity {
 
   public void assignEmployeePosition(EmployeePosition employeePosition) {
     this.employeePosition = employeePosition;
+  }
+
+  public void updateContact(String address, String phone) {
+    this.address = address;
+    this.phone = phone;
   }
 
   public void changeRole(EmployeeRole role) {

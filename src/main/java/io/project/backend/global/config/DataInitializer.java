@@ -25,6 +25,8 @@ public class DataInitializer implements CommandLineRunner {
   private static final String ADMIN_EMPLOYEE_NUMBER = "ADMIN001";
   private static final String ADMIN_POSITION = "시스템 관리자";
   private static final String MANAGEMENT_SUPPORT_TEAM = "경영지원팀";
+  private static final String DEFAULT_ADMIN_ADDRESS = "서울시 강남구";
+  private static final String DEFAULT_ADMIN_PHONE = "010-1234-1004";
 
   private final DepartmentRepository departmentRepository;
   private final EmployeeRepository employeeRepository;
@@ -42,8 +44,7 @@ public class DataInitializer implements CommandLineRunner {
 
     String encodedPassword = passwordEncoder.encode(adminProperties.password());
     Department department = departmentRepository.findByName(MANAGEMENT_SUPPORT_TEAM).orElse(null);
-    EmployeePosition employeePosition = employeePositionRepository.findByName(ADMIN_POSITION)
-        .orElse(null);
+    EmployeePosition employeePosition = employeePositionRepository.findByName(ADMIN_POSITION).orElse(null);
 
     Employee admin = Employee.builder()
         .employeeNumber(ADMIN_EMPLOYEE_NUMBER)
@@ -53,6 +54,8 @@ public class DataInitializer implements CommandLineRunner {
         .role(EmployeeRole.ADMIN)
         .employeePosition(employeePosition)
         .department(department)
+        .address(DEFAULT_ADMIN_ADDRESS)
+        .phone(DEFAULT_ADMIN_PHONE)
         .hireDate(LocalDate.now())
         .build();
 

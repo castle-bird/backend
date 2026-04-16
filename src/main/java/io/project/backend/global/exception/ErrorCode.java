@@ -20,7 +20,8 @@ public enum ErrorCode {
   // Employee
   EMPLOYEE_NOT_FOUND(HttpStatus.NOT_FOUND, "E001", "존재하지 않는 직원입니다."),
   EMPLOYEE_DUPLICATE(HttpStatus.CONFLICT, "E002", "이미 존재하는 직원입니다."),
-  DEPARTMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "E003", "존재하지 않는 부서입니다.");
+  DEPARTMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "E003", "존재하지 않는 부서입니다."),
+  POSITION_INVALID(HttpStatus.BAD_REQUEST, "E004", "존재하지 않는 직급입니다.");
 
   private final HttpStatus status;
   private final String customCode;

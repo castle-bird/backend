@@ -4,6 +4,7 @@ import io.project.backend.domain.auth.controller.api.AuthControllerApi;
 import io.project.backend.domain.auth.dto.common.AuthTokenDto;
 import io.project.backend.domain.auth.dto.common.LoginDto;
 import io.project.backend.domain.auth.dto.request.LoginRequest;
+import io.project.backend.domain.auth.dto.request.PasswordChangeRequest;
 import io.project.backend.domain.auth.dto.request.SignupRequest;
 import io.project.backend.domain.auth.dto.response.AuthResponse;
 import io.project.backend.domain.auth.dto.response.LoginResponse;
@@ -36,7 +37,7 @@ public class AuthController implements AuthControllerApi {
   private final JwtProperties jwtProperties;
   private final AuthService authService;
 
-  @PostMapping("/register")
+  @PostMapping("/registe")
   public ResponseEntity<CommonApiResponse<SignupResponse>> createEmployee(
       @Valid @RequestBody SignupRequest signupRequest
   ) {
@@ -108,6 +109,20 @@ public class AuthController implements AuthControllerApi {
     return ResponseEntity
         .status(HttpStatus.OK)
         .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
+        .body(CommonApiResponse.ok(null));
+  }
+
+  @Override
+  @PostMapping("/password")
+  public ResponseEntity<CommonApiResponse<Void>> passwordChange(
+      @AuthenticationPrincipal UserDetailsImpl userDetails,
+      @Valid @RequestBody PasswordChangeRequest passwordChangeRequest
+  ) {
+
+    authService.passwordChange(userDetails.getUserId(), passwordChangeRequest);
+
+    return ResponseEntity
+        .status(HttpStatus.OK)
         .body(CommonApiResponse.ok(null));
   }
 

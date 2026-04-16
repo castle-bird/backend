@@ -99,7 +99,7 @@ src/main/java/io/project/backend/
 ### 직원 등록 (관리자)
 관리자가 직접 직원 계정을 생성하는 ERP 도메인 방식입니다. 직원이 스스로 가입하지 않습니다.
 
-1. 관리자가 `POST /auth/signup`으로 직원 정보(이름, 이메일, 권한, 직급, 부서)를 전달합니다.
+1. 관리자가 `POST /auth/register`으로 직원 정보(이름, 이메일, 권한, 직급, 부서)를 전달합니다.
 2. Controller에서 요청 유효성을 검증한 뒤 Service에 등록을 위임합니다.
 3. Service에서 이메일 중복·부서 존재 여부를 확인합니다.
 4. 사원번호(입사일 + 당일 입사자 순번)를 자동 생성합니다.
@@ -111,7 +111,7 @@ src/main/java/io/project/backend/
 
 #### 흐름요약
 ```text
-Admin -> AuthController.createEmployee()
+Admin -> POST /auth/register -> AuthController.createEmployee()
       -> AuthService.createEmployee()
       -> EmployeeRepository / DepartmentRepository
       -> generateTemporaryPassword() + PasswordEncoder

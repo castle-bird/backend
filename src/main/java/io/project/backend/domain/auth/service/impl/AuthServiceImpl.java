@@ -2,9 +2,10 @@ package io.project.backend.domain.auth.service.impl;
 
 import io.jsonwebtoken.Claims;
 import io.project.backend.domain.auth.dto.common.AuthTokenDto;
-import io.project.backend.domain.auth.dto.request.LoginRequest;
-import io.project.backend.domain.auth.dto.request.SignupRequest;
 import io.project.backend.domain.auth.dto.common.LoginDto;
+import io.project.backend.domain.auth.dto.request.LoginRequest;
+import io.project.backend.domain.auth.dto.request.PasswordChangeRequest;
+import io.project.backend.domain.auth.dto.request.SignupRequest;
 import io.project.backend.domain.auth.dto.response.SignupResponse;
 import io.project.backend.domain.auth.exception.AuthenticationException;
 import io.project.backend.domain.auth.exception.InvalidTokenException;
@@ -15,10 +16,12 @@ import io.project.backend.domain.employee.entity.Employee;
 import io.project.backend.domain.employee.entity.EmployeePosition;
 import io.project.backend.domain.employee.exception.DepartmentNotFoundException;
 import io.project.backend.domain.employee.exception.EmployeeDuplicateException;
+import io.project.backend.domain.employee.exception.EmployeeNotFoundException;
+import io.project.backend.domain.employee.exception.PositonNotFoundException;
 import io.project.backend.domain.employee.mapper.EmployeeMapper;
 import io.project.backend.domain.employee.repository.DepartmentRepository;
-import io.project.backend.domain.employee.repository.EmployeeRepository;
 import io.project.backend.domain.employee.repository.EmployeePositionRepository;
+import io.project.backend.domain.employee.repository.EmployeeRepository;
 import io.project.backend.global.security.jwt.JwtProperties;
 import io.project.backend.global.security.jwt.JwtProvider;
 import io.project.backend.global.security.jwt.TokenType;
@@ -65,7 +68,12 @@ public class AuthServiceImpl implements AuthService {
         .orElseThrow(() -> new DepartmentNotFoundException(
             Map.of("department", request.department())
         ));
-    EmployeePosition employeePosition = resolveOrCreateEmployeePosition(request.employeePosition());
+
+    // 직급 체크
+    EmployeePosition employeePosition = employeePositionRepository.findByName(
+            request.employeePosition())
+        .orElseThrow(() -> new PositonNotFoundException(
+            Map.of("employeePosition", request.employeePosition())));
 
     // 사원번호(날짜 + 입사자 수)생성
     LocalDate today = LocalDate.now();
@@ -218,6 +226,35 @@ public class AuthServiceImpl implements AuthService {
     return new String(password);
   }
 
+  @Override
+  @Transactional
+  public void passwordChange(Long userId, PasswordChangeRequest passwordChangeRequest) {
+    // 사원 검증
+    Employee employee = employeeRepository.findByIdAndDeletedFalse(userId).orElseThrow(
+        () -> new EmployeeNotFoundException(Map.of("userId", userId))
+    );
+
+    // 현재 비밀번호 검증
+    if (!passwordEncoder.matches(
+        passwordChangeRequest.currentPwd(),
+        employee.getPassword())
+    ) {
+      throw new AuthenticationException(
+          Map.of("invalid", "비밀번호가 잘못되었습니다.")
+      );
+    }
+
+    // 새 비밀번호가 현재 비밀번호와 동일한 경우 거부
+    if (passwordEncoder.matches(passwordChangeRequest.newPwd(), employee.getPassword())) {
+      throw new AuthenticationException(
+          Map.of("invalid", "새 비밀번호는 현재 비밀번호와 달라야 합니다.")
+      );
+    }
+
+    employee.changePassword(passwordEncoder.encode(passwordChangeRequest.newPwd()));
+    refreshTokenRedisRepository.deleteAllByUserId(userId);
+  }
+
   /**
    * 전달된 employee에 대해 새로운 인증 토큰(access token, refresh token)을 발급한다.
    * refresh token은 Redis 저장소에 TTL과 함께 저장한다.
@@ -244,22 +281,5 @@ public class AuthServiceImpl implements AuthService {
     );
 
     return AuthTokenDto.of(accessToken, refreshToken);
-  }
-
-  private EmployeePosition resolveOrCreateEmployeePosition(String positionName) {
-    return employeePositionRepository.findByName(positionName)
-        .orElseGet(() -> {
-          short nextSortOrder = employeePositionRepository.findTopByOrderBySortOrderDesc()
-              .map(EmployeePosition::getSortOrder)
-              .map(sortOrder -> (short) (sortOrder + 1))
-              .orElse((short) 1);
-
-          EmployeePosition newPosition = EmployeePosition.builder()
-              .name(positionName)
-              .sortOrder(nextSortOrder)
-              .build();
-
-          return employeePositionRepository.save(newPosition);
-        });
   }
 }

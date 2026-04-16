@@ -19,6 +19,8 @@ public interface EmployeeMapper {
   @Mapping(target = "employeePosition", source = "employeePosition")
   @Mapping(target = "hireDate", source = "hireDate")
   @Mapping(target = "department", source = "department")
+  @Mapping(target = "address", source = "signupRequest.address")
+  @Mapping(target = "phone", source = "signupRequest.phone")
   Employee toEntityForSignup(
       SignupRequest signupRequest,
       String encodedPassword,
