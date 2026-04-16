@@ -5,7 +5,10 @@ import io.project.backend.domain.employee.dto.common.PositionListDto;
 import java.util.List;
 
 public interface EmployeeService {
+
   List<DepartmentListDto> getDepartmentList();
 
   List<PositionListDto> getPositionList();
+
+  void deleteEmployee(Long id);
 }
