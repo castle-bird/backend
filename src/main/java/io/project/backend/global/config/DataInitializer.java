@@ -1,7 +1,9 @@
 package io.project.backend.global.config;
 
+import io.project.backend.domain.employee.entity.Department;
 import io.project.backend.domain.employee.entity.Employee;
 import io.project.backend.domain.employee.entity.EmployeeRole;
+import io.project.backend.domain.employee.repository.DepartmentRepository;
 import io.project.backend.domain.employee.repository.EmployeeRepository;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +22,9 @@ public class DataInitializer implements CommandLineRunner {
 
   private static final String ADMIN_EMPLOYEE_NUMBER = "ADMIN001";
   private static final String ADMIN_POSITION = "시스템 관리자";
+  private static final String MANAGEMENT_SUPPORT_TEAM = "경영지원팀";
 
+  private final DepartmentRepository departmentRepository;
   private final EmployeeRepository employeeRepository;
   private final PasswordEncoder passwordEncoder;
   private final AdminProperties adminProperties;
@@ -34,6 +38,7 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     String encodedPassword = passwordEncoder.encode(adminProperties.password());
+    Department department = departmentRepository.findByName(MANAGEMENT_SUPPORT_TEAM).orElse(null);
 
     Employee admin = Employee.builder()
         .employeeNumber(ADMIN_EMPLOYEE_NUMBER)
@@ -42,11 +47,10 @@ public class DataInitializer implements CommandLineRunner {
         .password(encodedPassword)
         .role(EmployeeRole.ADMIN)
         .position(ADMIN_POSITION)
-        .department(null)
+        .department(department)
         .hireDate(LocalDate.now())
         .build();
 
-    // passwordChangeRequired = false (초기 관리자는 비밀번호 변경 강제 불필요)
     admin.changePassword(encodedPassword);
 
     employeeRepository.save(admin);

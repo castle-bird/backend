@@ -36,7 +36,7 @@ public class AuthController implements AuthControllerApi {
   private final JwtProperties jwtProperties;
   private final AuthService authService;
 
-  @PostMapping("/signup")
+  @PostMapping("/register")
   public ResponseEntity<CommonApiResponse<SignupResponse>> createEmployee(
       @Valid @RequestBody SignupRequest signupRequest
   ) {
