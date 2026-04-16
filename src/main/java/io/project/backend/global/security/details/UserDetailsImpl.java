@@ -47,7 +47,7 @@ public class UserDetailsImpl implements UserDetails {
   // 자격 증명 만료 여부. e.g. 비밀번호 유효 기간 만료 등
   @Override
   public boolean isCredentialsNonExpired() {
-    return true;
+    return !employee.isPasswordChangeRequired();
   }
 
   // 계정 활성화 여부. e.g. 이메일 인증 완료 여부, 회원 탈퇴 여부 등

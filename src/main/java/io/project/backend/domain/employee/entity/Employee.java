@@ -40,6 +40,10 @@ public class Employee extends BaseTimeEntity {
   @ColumnTransformer(read = "role::text", write = "?::employee_role")
   private EmployeeRole role;
 
+  // 첫 로그인시 비번 강제 초기화를 위함
+  @Column(name = "password_change_required", nullable = false)
+  boolean passwordChangeRequired = true;
+
   @Column(nullable = false, length = 50)
   private String position;
 
@@ -62,6 +66,7 @@ public class Employee extends BaseTimeEntity {
       String name,
       String email,
       String password,
+      EmployeeRole role,
       String position,
       Department department,
       LocalDate hireDate
@@ -70,7 +75,7 @@ public class Employee extends BaseTimeEntity {
     this.name = name;
     this.email = email;
     this.password = password;
-    this.role = EmployeeRole.EMPLOYEE;
+    this.role = role;
     this.position = position;
     this.department = department;
     this.hireDate = hireDate;
@@ -84,6 +89,7 @@ public class Employee extends BaseTimeEntity {
 
   public void changePassword(String encodedPassword) {
     this.password = encodedPassword;
+    this.passwordChangeRequired = false;
   }
 
   public void assignDepartment(Department department) {

@@ -10,6 +10,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface EmployeeMapper {
 
+  @Mapping(target = "role",           source = "signupRequest.role")
   @Mapping(target = "employeeNumber", source = "employeeNumber")
   @Mapping(target = "name",           source = "signupRequest.name")
   @Mapping(target = "email",          source = "signupRequest.email")

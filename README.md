@@ -96,30 +96,37 @@ src/main/java/io/project/backend/
 
 ## 인증/인가 플로우
 
-### 회원가입
-1. 클라이언트가 `POST /auth/signup`으로 회원 정보를 전달합니다.
-2. Controller에서 요청 유효성을 검증한 뒤 Service에 회원가입을 위임합니다.
-3. Service에서 이메일/부서 등 필수 조건을 확인하고 비밀번호를 `BCryptPasswordEncoder`로 암호화합니다.
-4. 사용자 저장 후 Access Token과 Refresh Token을 발급합니다.
-5. Refresh Token은 Redis에 저장하고, Access Token은 응답 바디로 반환합니다.
+### 직원 등록 (관리자)
+관리자가 직접 직원 계정을 생성하는 ERP 도메인 방식입니다. 직원이 스스로 가입하지 않습니다.
+
+1. 관리자가 `POST /auth/signup`으로 직원 정보(이름, 이메일, 권한, 직급, 부서)를 전달합니다.
+2. Controller에서 요청 유효성을 검증한 뒤 Service에 등록을 위임합니다.
+3. Service에서 이메일 중복·부서 존재 여부를 확인합니다.
+4. 사원번호(입사일 + 당일 입사자 순번)를 자동 생성합니다.
+5. 임시 비밀번호(영문·숫자·특수문자 포함 12자)를 자동 생성하고 `BCryptPasswordEncoder`로 암호화하여 저장합니다.
+6. 직원의 `passwordChangeRequired` 플래그를 `true`로 설정합니다.
+7. 응답으로 이메일과 평문 임시 비밀번호를 반환합니다. (관리자가 직원에게 별도 전달)
+
+> 토큰은 이 단계에서 발급하지 않습니다.
 
 #### 흐름요약
 ```text
-Client -> AuthController.signup()
-       -> AuthService.signup()
-       -> EmployeeRepository / DepartmentRepository
-       -> JwtProvider + RefreshTokenRedisRepository
-       -> Response(Access Token + Refresh Token Cookie)
+Admin -> AuthController.createEmployee()
+      -> AuthService.createEmployee()
+      -> EmployeeRepository / DepartmentRepository
+      -> generateTemporaryPassword() + PasswordEncoder
+      -> Response(email + temporaryPassword)
 ```
 
 ---
 
 ### 로그인
-1. 클라이언트가 `POST /auth/login`으로 인증 정보를 전달합니다.
+1. 직원이 `POST /auth/login`으로 이메일과 비밀번호(최초 로그인 시 임시 비밀번호)를 전달합니다.
 2. Controller가 요청 형식을 검증하고 Service로 전달합니다.
-3. Service에서 사용자 조회 후 비밀번호를 검증합니다.
-4. 검증 성공 시 Access Token/Refresh Token을 재발급하고 Refresh Token을 Redis에 갱신 저장합니다.
-5. 실패 시 인증 오류를 반환하고 토큰은 발급하지 않습니다.
+3. Service에서 직원을 조회하고 비밀번호를 검증합니다.
+4. 검증 성공 시 Access Token/Refresh Token을 발급하고 Refresh Token을 Redis에 저장합니다.
+5. 임시 비밀번호로 로그인한 경우 응답에 `passwordChangeRequired: true`가 포함됩니다. 클라이언트는 이를 확인하여 비밀번호 변경을 유도해야 합니다.
+6. 실패 시 인증 오류를 반환하고 토큰은 발급하지 않습니다.
 
 #### 흐름요약
 ```text
@@ -127,7 +134,7 @@ Client -> AuthController.login()
        -> AuthService.login()
        -> EmployeeRepository + PasswordEncoder
        -> JwtProvider + RefreshTokenRedisRepository
-       -> Response(Access Token + Refresh Token Cookie)
+       -> Response(Access Token + Refresh Token Cookie + passwordChangeRequired)
 ```
 
 ---

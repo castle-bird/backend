@@ -15,6 +15,7 @@ public enum ErrorCode {
   TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "A002", "유효하지 않은 토큰입니다."),
   TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "A003", "만료된 토큰입니다."),
   TOKEN_REUSE_DETECTED(HttpStatus.UNAUTHORIZED, "A004", "토큰 재사용이 감지되었습니다."),
+  PASSWORD_CHANGE_REQUIRED(HttpStatus.FORBIDDEN, "A005", "비밀번호 변경이 필요합니다."),
 
   // Employee
   EMPLOYEE_NOT_FOUND(HttpStatus.NOT_FOUND, "E001", "존재하지 않는 직원입니다."),
