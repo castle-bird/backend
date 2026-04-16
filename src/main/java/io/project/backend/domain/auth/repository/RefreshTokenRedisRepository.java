@@ -10,4 +10,6 @@ public interface RefreshTokenRedisRepository {
   boolean exists(Long userId, String refreshToken);
 
   void delete(Long userId, String refreshToken);
+
+  void deleteAllByUserId(Long userId);
 }

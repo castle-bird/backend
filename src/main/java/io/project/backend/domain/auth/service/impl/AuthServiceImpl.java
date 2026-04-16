@@ -2,9 +2,10 @@ package io.project.backend.domain.auth.service.impl;
 
 import io.jsonwebtoken.Claims;
 import io.project.backend.domain.auth.dto.common.AuthTokenDto;
-import io.project.backend.domain.auth.dto.request.LoginRequest;
-import io.project.backend.domain.auth.dto.request.SignupRequest;
 import io.project.backend.domain.auth.dto.common.LoginDto;
+import io.project.backend.domain.auth.dto.request.LoginRequest;
+import io.project.backend.domain.auth.dto.request.PasswordChangeRequest;
+import io.project.backend.domain.auth.dto.request.SignupRequest;
 import io.project.backend.domain.auth.dto.response.SignupResponse;
 import io.project.backend.domain.auth.exception.AuthenticationException;
 import io.project.backend.domain.auth.exception.InvalidTokenException;
@@ -14,6 +15,7 @@ import io.project.backend.domain.employee.entity.Department;
 import io.project.backend.domain.employee.entity.Employee;
 import io.project.backend.domain.employee.exception.DepartmentNotFoundException;
 import io.project.backend.domain.employee.exception.EmployeeDuplicateException;
+import io.project.backend.domain.employee.exception.EmployeeNotFoundException;
 import io.project.backend.domain.employee.mapper.EmployeeMapper;
 import io.project.backend.domain.employee.repository.DepartmentRepository;
 import io.project.backend.domain.employee.repository.EmployeeRepository;
@@ -211,6 +213,35 @@ public class AuthServiceImpl implements AuthService {
     }
 
     return new String(password);
+  }
+
+  @Override
+  @Transactional
+  public void passwordChange(Long userId, PasswordChangeRequest passwordChangeRequest) {
+    // 사원 검증
+    Employee employee = employeeRepository.findByIdAndDeletedFalse(userId).orElseThrow(
+        () -> new EmployeeNotFoundException(Map.of("userId", userId))
+    );
+
+    // 현재 비밀번호 검증
+    if (!passwordEncoder.matches(
+        passwordChangeRequest.currentPwd(),
+        employee.getPassword())
+    ) {
+      throw new AuthenticationException(
+          Map.of("invalid", "비밀번호가 잘못되었습니다.")
+      );
+    }
+
+    // 새 비밀번호가 현재 비밀번호와 동일한 경우 거부
+    if (passwordEncoder.matches(passwordChangeRequest.newPwd(), employee.getPassword())) {
+      throw new AuthenticationException(
+          Map.of("invalid", "새 비밀번호는 현재 비밀번호와 달라야 합니다.")
+      );
+    }
+
+    employee.changePassword(passwordEncoder.encode(passwordChangeRequest.newPwd()));
+    refreshTokenRedisRepository.deleteAllByUserId(userId);
   }
 
   /**

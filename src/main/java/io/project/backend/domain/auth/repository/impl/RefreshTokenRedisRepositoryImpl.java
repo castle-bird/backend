@@ -156,6 +156,22 @@ public class RefreshTokenRedisRepositoryImpl implements RefreshTokenRedisReposit
     }
   }
 
+  @Override
+  public void deleteAllByUserId(Long userId) {
+    String indexKeyPrefix = generateIndexKey(userId);
+    Set<String> idxTokens = findIndexTokens(indexKeyPrefix);
+
+    if (idxTokens == null || idxTokens.isEmpty()) {
+      redisTemplate.delete(indexKeyPrefix);
+      return;
+    }
+
+    for (String idxToken : idxTokens) {
+      redisTemplate.delete(generateTokenKey(userId, idxToken));
+    }
+    redisTemplate.delete(indexKeyPrefix);
+  }
+
   /* ================== 공통 ================== */
 
   private Set<String> findIndexTokens(String indexKey) {

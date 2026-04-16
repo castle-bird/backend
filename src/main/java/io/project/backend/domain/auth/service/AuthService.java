@@ -1,9 +1,10 @@
 package io.project.backend.domain.auth.service;
 
 import io.project.backend.domain.auth.dto.common.AuthTokenDto;
-import io.project.backend.domain.auth.dto.request.LoginRequest;
-import io.project.backend.domain.auth.dto.request.SignupRequest;
 import io.project.backend.domain.auth.dto.common.LoginDto;
+import io.project.backend.domain.auth.dto.request.LoginRequest;
+import io.project.backend.domain.auth.dto.request.PasswordChangeRequest;
+import io.project.backend.domain.auth.dto.request.SignupRequest;
 import io.project.backend.domain.auth.dto.response.SignupResponse;
 
 public interface AuthService {
@@ -15,4 +16,6 @@ public interface AuthService {
   AuthTokenDto refreshToken(String refreshToken);
 
   void logout(Long userId, String refreshToken);
+
+  void passwordChange(Long userId ,PasswordChangeRequest passwordChangeRequest);
 }
