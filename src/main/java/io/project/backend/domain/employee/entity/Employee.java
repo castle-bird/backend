@@ -44,8 +44,9 @@ public class Employee extends BaseTimeEntity {
   @Column(name = "password_change_required", nullable = false)
   boolean passwordChangeRequired = true;
 
-  @Column(nullable = false, length = 50)
-  private String position;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "position_id",nullable = false)
+  private EmployeePosition employeePosition;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "department_id")
@@ -67,7 +68,7 @@ public class Employee extends BaseTimeEntity {
       String email,
       String password,
       EmployeeRole role,
-      String position,
+      EmployeePosition employeePosition,
       Department department,
       LocalDate hireDate
   ) {
@@ -76,7 +77,7 @@ public class Employee extends BaseTimeEntity {
     this.email = email;
     this.password = password;
     this.role = role;
-    this.position = position;
+    this.employeePosition = employeePosition;
     this.department = department;
     this.hireDate = hireDate;
     this.deleted = false;
@@ -96,8 +97,8 @@ public class Employee extends BaseTimeEntity {
     this.department = department;
   }
 
-  public void updatePosition(String position) {
-    this.position = position;
+  public void assignEmployeePosition(EmployeePosition employeePosition) {
+    this.employeePosition = employeePosition;
   }
 
   public void changeRole(EmployeeRole role) {

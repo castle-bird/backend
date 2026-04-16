@@ -12,11 +12,13 @@ import io.project.backend.domain.auth.repository.RefreshTokenRedisRepository;
 import io.project.backend.domain.auth.service.AuthService;
 import io.project.backend.domain.employee.entity.Department;
 import io.project.backend.domain.employee.entity.Employee;
+import io.project.backend.domain.employee.entity.EmployeePosition;
 import io.project.backend.domain.employee.exception.DepartmentNotFoundException;
 import io.project.backend.domain.employee.exception.EmployeeDuplicateException;
 import io.project.backend.domain.employee.mapper.EmployeeMapper;
 import io.project.backend.domain.employee.repository.DepartmentRepository;
 import io.project.backend.domain.employee.repository.EmployeeRepository;
+import io.project.backend.domain.employee.repository.EmployeePositionRepository;
 import io.project.backend.global.security.jwt.JwtProperties;
 import io.project.backend.global.security.jwt.JwtProvider;
 import io.project.backend.global.security.jwt.TokenType;
@@ -40,6 +42,7 @@ public class AuthServiceImpl implements AuthService {
 
   private final EmployeeRepository employeeRepository;
   private final DepartmentRepository departmentRepository;
+  private final EmployeePositionRepository employeePositionRepository;
   private final EmployeeMapper employeeMapper;
   private final PasswordEncoder passwordEncoder;
   private final JwtProvider jwtProvider;
@@ -62,6 +65,7 @@ public class AuthServiceImpl implements AuthService {
         .orElseThrow(() -> new DepartmentNotFoundException(
             Map.of("department", request.department())
         ));
+    EmployeePosition employeePosition = resolveOrCreateEmployeePosition(request.employeePosition());
 
     // 사원번호(날짜 + 입사자 수)생성
     LocalDate today = LocalDate.now();
@@ -79,7 +83,8 @@ public class AuthServiceImpl implements AuthService {
         encodedPassword,
         employeeNumber,
         today,
-        department
+        department,
+        employeePosition
     );
 
     employeeRepository.save(employee);
@@ -239,5 +244,22 @@ public class AuthServiceImpl implements AuthService {
     );
 
     return AuthTokenDto.of(accessToken, refreshToken);
+  }
+
+  private EmployeePosition resolveOrCreateEmployeePosition(String positionName) {
+    return employeePositionRepository.findByName(positionName)
+        .orElseGet(() -> {
+          short nextSortOrder = employeePositionRepository.findTopByOrderBySortOrderDesc()
+              .map(EmployeePosition::getSortOrder)
+              .map(sortOrder -> (short) (sortOrder + 1))
+              .orElse((short) 1);
+
+          EmployeePosition newPosition = EmployeePosition.builder()
+              .name(positionName)
+              .sortOrder(nextSortOrder)
+              .build();
+
+          return employeePositionRepository.save(newPosition);
+        });
   }
 }

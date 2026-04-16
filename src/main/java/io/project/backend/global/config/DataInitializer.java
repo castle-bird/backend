@@ -2,8 +2,10 @@ package io.project.backend.global.config;
 
 import io.project.backend.domain.employee.entity.Department;
 import io.project.backend.domain.employee.entity.Employee;
+import io.project.backend.domain.employee.entity.EmployeePosition;
 import io.project.backend.domain.employee.entity.EmployeeRole;
 import io.project.backend.domain.employee.repository.DepartmentRepository;
+import io.project.backend.domain.employee.repository.EmployeePositionRepository;
 import io.project.backend.domain.employee.repository.EmployeeRepository;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class DataInitializer implements CommandLineRunner {
 
   private final DepartmentRepository departmentRepository;
   private final EmployeeRepository employeeRepository;
+  private final EmployeePositionRepository employeePositionRepository;
   private final PasswordEncoder passwordEncoder;
   private final AdminProperties adminProperties;
 
@@ -39,6 +42,8 @@ public class DataInitializer implements CommandLineRunner {
 
     String encodedPassword = passwordEncoder.encode(adminProperties.password());
     Department department = departmentRepository.findByName(MANAGEMENT_SUPPORT_TEAM).orElse(null);
+    EmployeePosition employeePosition = employeePositionRepository.findByName(ADMIN_POSITION)
+        .orElse(null);
 
     Employee admin = Employee.builder()
         .employeeNumber(ADMIN_EMPLOYEE_NUMBER)
@@ -46,7 +51,7 @@ public class DataInitializer implements CommandLineRunner {
         .email(adminProperties.email())
         .password(encodedPassword)
         .role(EmployeeRole.ADMIN)
-        .position(ADMIN_POSITION)
+        .employeePosition(employeePosition)
         .department(department)
         .hireDate(LocalDate.now())
         .build();
@@ -55,6 +60,6 @@ public class DataInitializer implements CommandLineRunner {
 
     employeeRepository.save(admin);
 
-    log.info("초기 관리자 계정이 생성되었습니다. 이메일: {}", adminProperties.email());
+    log.info("초기 관리자 계정을 생성했습니다. 이메일: {}", adminProperties.email());
   }
 }
