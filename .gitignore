@@ -45,6 +45,7 @@ application-prod.yaml
 CLAUDE.md
 .claude/*
 AGENTS.md
+.aiassistant/*
 
 ### Files ###
 .log/

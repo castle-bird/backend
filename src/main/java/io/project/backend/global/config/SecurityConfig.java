@@ -2,6 +2,7 @@ package io.project.backend.global.config;
 
 import io.project.backend.global.security.jwt.JwtAuthenticationFilter;
 import io.project.backend.global.security.jwt.JwtProperties;
+import io.project.backend.global.security.jwt.PasswordChangeRequiredFilter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -34,6 +35,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
+  private final PasswordChangeRequiredFilter passwordChangeRequiredFilter;
   private final Environment environment;
 
   @Bean
@@ -46,6 +48,7 @@ public class SecurityConfig {
         .sessionManagement(sessionManagementCustomizer())
         .cors(corsCustomizer())
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterAfter(passwordChangeRequiredFilter,JwtAuthenticationFilter.class) // → 인증 완료 후, 최초 비번 변경했는지 체크
         .build();
   }
 
@@ -58,7 +61,7 @@ public class SecurityConfig {
       }
 
       auth
-          .requestMatchers(HttpMethod.POST, "/auth/signup").permitAll()
+          .requestMatchers(HttpMethod.POST, "/auth/signup").hasRole("ADMIN")
           .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
           .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
           .requestMatchers(HttpMethod.POST, "/auth/logout").authenticated()

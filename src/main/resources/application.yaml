@@ -68,3 +68,8 @@ app:
     access-token-expiration: ${JWT_ACCESS_EXPIRATION_MS}
     refresh-token-expiration: ${JWT_REFRESH_EXPIRATION_MS}
     jwt-issuer: ${JWT_ISSUER}
+
+  admin:
+    email: ${ADMIN_EMAIL}
+    password: ${ADMIN_PASSWORD}
+    name: ${ADMIN_NAME}
