@@ -89,6 +89,7 @@ public class Employee extends BaseTimeEntity {
 
   public void changePassword(String encodedPassword) {
     this.password = encodedPassword;
+    this.passwordChangeRequired = false;
   }
 
   public void assignDepartment(Department department) {
