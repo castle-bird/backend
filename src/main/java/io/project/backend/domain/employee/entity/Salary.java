@@ -8,7 +8,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,32 +29,28 @@ public class Salary extends BaseTimeEntity {
   @Column(name = "year_salary", nullable = false, precision = 15, scale = 2)
   private BigDecimal yearSalary;
 
-  @Column(nullable = false, precision = 15, scale = 2)
-  private BigDecimal bonus;
-
-  @Column(name = "payment_date")
-  private LocalDate paymentDate;
+  @Column(name = "payment_day")
+  private Short paymentDay;
 
   @Builder
   private Salary(
       Employee employee,
       BigDecimal monthSalary,
       BigDecimal yearSalary,
-      BigDecimal bonus,
-      LocalDate paymentDate
+      Short paymentDay
   ) {
     this.employee = employee;
     this.monthSalary = monthSalary;
     this.yearSalary = yearSalary;
-    this.bonus = bonus != null ? bonus : BigDecimal.ZERO;
-    this.paymentDate = paymentDate;
+    this.paymentDay = paymentDay;
   }
 
-  public void updateBonus(BigDecimal bonus) {
-    this.bonus = bonus;
+  public void updatePaymentDay(Short paymentDay) {
+    this.paymentDay = paymentDay;
   }
 
-  public void recordPaymentDate(LocalDate paymentDate) {
-    this.paymentDate = paymentDate;
+  public void updateSalary(BigDecimal monthSalary, BigDecimal yearSalary) {
+    this.monthSalary = monthSalary;
+    this.yearSalary = yearSalary;
   }
 }

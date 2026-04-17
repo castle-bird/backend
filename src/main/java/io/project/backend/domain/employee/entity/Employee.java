@@ -1,5 +1,6 @@
 package io.project.backend.domain.employee.entity;
 
+import io.project.backend.domain.employee.dto.request.UpdateEmployeeRequest;
 import io.project.backend.global.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,16 +41,22 @@ public class Employee extends BaseTimeEntity {
   @ColumnTransformer(read = "role::text", write = "?::employee_role")
   private EmployeeRole role;
 
-  // 첫 로그인시 비번 강제 초기화를 위함
   @Column(name = "password_change_required", nullable = false)
   boolean passwordChangeRequired = true;
 
-  @Column(nullable = false, length = 50)
-  private String position;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "position_id", nullable = false)
+  private EmployeePosition employeePosition;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "department_id")
   private Department department;
+
+  @Column(name = "address", nullable = false, length = 255)
+  private String address;
+
+  @Column(name = "phone", nullable = false, length = 20)
+  private String phone;
 
   @Column(name = "hire_date")
   private LocalDate hireDate;
@@ -67,8 +74,10 @@ public class Employee extends BaseTimeEntity {
       String email,
       String password,
       EmployeeRole role,
-      String position,
+      EmployeePosition employeePosition,
       Department department,
+      String address,
+      String phone,
       LocalDate hireDate
   ) {
     this.employeeNumber = employeeNumber;
@@ -76,8 +85,10 @@ public class Employee extends BaseTimeEntity {
     this.email = email;
     this.password = password;
     this.role = role;
-    this.position = position;
+    this.employeePosition = employeePosition;
     this.department = department;
+    this.address = address;
+    this.phone = phone;
     this.hireDate = hireDate;
     this.deleted = false;
   }
@@ -96,11 +107,30 @@ public class Employee extends BaseTimeEntity {
     this.department = department;
   }
 
-  public void updatePosition(String position) {
-    this.position = position;
+  public void assignEmployeePosition(EmployeePosition employeePosition) {
+    this.employeePosition = employeePosition;
+  }
+
+  public void updateContact(String address, String phone) {
+    this.address = address;
+    this.phone = phone;
   }
 
   public void changeRole(EmployeeRole role) {
     this.role = role;
+  }
+
+  public void updateAllInfo(
+      UpdateEmployeeRequest request,
+      Department department,
+      EmployeePosition employeePosition
+  ) {
+    this.name = request.name();
+    this.email = request.email();
+    this.role = request.role();
+    this.address = request.address();
+    this.phone = request.phone();
+    this.department = department;
+    this.employeePosition = employeePosition;
   }
 }

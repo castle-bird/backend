@@ -1,7 +1,11 @@
 package io.project.backend.global.config;
 
+import io.project.backend.domain.employee.entity.Department;
 import io.project.backend.domain.employee.entity.Employee;
+import io.project.backend.domain.employee.entity.EmployeePosition;
 import io.project.backend.domain.employee.entity.EmployeeRole;
+import io.project.backend.domain.employee.repository.DepartmentRepository;
+import io.project.backend.domain.employee.repository.EmployeePositionRepository;
 import io.project.backend.domain.employee.repository.EmployeeRepository;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +24,13 @@ public class DataInitializer implements CommandLineRunner {
 
   private static final String ADMIN_EMPLOYEE_NUMBER = "ADMIN001";
   private static final String ADMIN_POSITION = "시스템 관리자";
+  private static final String MANAGEMENT_SUPPORT_TEAM = "경영지원팀";
+  private static final String DEFAULT_ADMIN_ADDRESS = "서울시 강남구";
+  private static final String DEFAULT_ADMIN_PHONE = "010-1234-1004";
 
+  private final DepartmentRepository departmentRepository;
   private final EmployeeRepository employeeRepository;
+  private final EmployeePositionRepository employeePositionRepository;
   private final PasswordEncoder passwordEncoder;
   private final AdminProperties adminProperties;
 
@@ -29,11 +38,15 @@ public class DataInitializer implements CommandLineRunner {
   @Transactional
   public void run(String... args) {
     if (employeeRepository.existsByEmail(adminProperties.email())) {
-      log.debug("관리자 계정이 이미 존재합니다. 초기화를 건너뜁니다.");
+      log.debug("=====================================================================================================");
+      log.debug("=========================== 관리자 계정이 이미 존재합니다. 초기화를 건너뜁니다. ===========================");
+      log.debug("=====================================================================================================");
       return;
     }
 
     String encodedPassword = passwordEncoder.encode(adminProperties.password());
+    Department department = departmentRepository.findByName(MANAGEMENT_SUPPORT_TEAM).orElse(null);
+    EmployeePosition employeePosition = employeePositionRepository.findByName(ADMIN_POSITION).orElse(null);
 
     Employee admin = Employee.builder()
         .employeeNumber(ADMIN_EMPLOYEE_NUMBER)
@@ -41,16 +54,19 @@ public class DataInitializer implements CommandLineRunner {
         .email(adminProperties.email())
         .password(encodedPassword)
         .role(EmployeeRole.ADMIN)
-        .position(ADMIN_POSITION)
-        .department(null)
+        .employeePosition(employeePosition)
+        .department(department)
+        .address(DEFAULT_ADMIN_ADDRESS)
+        .phone(DEFAULT_ADMIN_PHONE)
         .hireDate(LocalDate.now())
         .build();
 
-    // passwordChangeRequired = false (초기 관리자는 비밀번호 변경 강제 불필요)
     admin.changePassword(encodedPassword);
 
     employeeRepository.save(admin);
 
-    log.info("초기 관리자 계정이 생성되었습니다. 이메일: {}", adminProperties.email());
+    log.info("=====================================================================================================");
+    log.info("======================== 초기 관리자 계정을 생성했습니다. 이메일: {} ========================", adminProperties.email());
+    log.info("=====================================================================================================");
   }
 }

@@ -1,4 +1,4 @@
-package io.project.backend.domain.auth.dto.request;
+package io.project.backend.domain.employee.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import io.project.backend.domain.employee.entity.EmployeeRole;
@@ -8,8 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-public record SignupRequest(
-
+public record UpdateEmployeeRequest(
     @NotBlank(message = "이름은 필수 입력값입니다.")
     @Size(min = 2, max = 50, message = "이름은 50자 이하여야 합니다.")
     String name,

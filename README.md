@@ -27,7 +27,7 @@
 | **인증 (Auth)** | JWT 로그인, Refresh Token 발급, 갱신, 폐기 |
 | **직원 (Employee)** | 직원 등록, 조회, 수정, Soft Delete, 부서 배정, 직급 변경 |
 | **부서 (Department)** | 부서 생성, 조회, 상태 유지 |
-| **급여 (Salary)** | 기본급 설정, 보너스 등록 및 수정 |
+| **급여 (Salary)** | 기본급/연봉 설정, 급여 지급일 설정 및 수정 (보너스 제외) |
 | **예약 (Reservation)** | 회의실 등록, 예약 생성 및 취소, 중복 예약 방지 |
 | **알림 (Notification)** | 예약 취소, 급여 변경, 조직 변경 공지 알림 |
 
@@ -99,7 +99,7 @@ src/main/java/io/project/backend/
 ### 직원 등록 (관리자)
 관리자가 직접 직원 계정을 생성하는 ERP 도메인 방식입니다. 직원이 스스로 가입하지 않습니다.
 
-1. 관리자가 `POST /auth/signup`으로 직원 정보(이름, 이메일, 권한, 직급, 부서)를 전달합니다.
+1. 관리자가 `POST /auth/register`으로 직원 정보(이름, 이메일, 권한, 직급, 부서)를 전달합니다.
 2. Controller에서 요청 유효성을 검증한 뒤 Service에 등록을 위임합니다.
 3. Service에서 이메일 중복·부서 존재 여부를 확인합니다.
 4. 사원번호(입사일 + 당일 입사자 순번)를 자동 생성합니다.
@@ -111,7 +111,7 @@ src/main/java/io/project/backend/
 
 #### 흐름요약
 ```text
-Admin -> AuthController.createEmployee()
+Admin -> POST /auth/register -> AuthController.createEmployee()
       -> AuthService.createEmployee()
       -> EmployeeRepository / DepartmentRepository
       -> generateTemporaryPassword() + PasswordEncoder
