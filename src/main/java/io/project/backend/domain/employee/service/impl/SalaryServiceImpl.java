@@ -7,6 +7,7 @@ import io.project.backend.domain.employee.entity.Employee;
 import io.project.backend.domain.employee.entity.Salary;
 import io.project.backend.domain.employee.exception.EmployeeNotFoundException;
 import io.project.backend.domain.employee.exception.SalaryDuplicateException;
+import io.project.backend.domain.employee.exception.SalaryNotFoundException;
 import io.project.backend.domain.employee.mapper.SalaryMapper;
 import io.project.backend.domain.employee.repository.EmployeeRepository;
 import io.project.backend.domain.employee.repository.SalaryRepository;
@@ -59,7 +60,7 @@ public class SalaryServiceImpl implements SalaryService {
   public SalaryResponse getSalary(Long employeeId) {
     Salary salary = salaryRepository.findByEmployeeIdAndEmployeeDeletedIsFalse(employeeId)
         .orElseThrow(
-            () -> new EmployeeNotFoundException(Map.of("employeeId", employeeId)));
+            () -> new SalaryNotFoundException(Map.of("employeeId", employeeId)));
 
     return salaryMapper.toResponse(salary);
   }
@@ -73,7 +74,7 @@ public class SalaryServiceImpl implements SalaryService {
 
     Salary salary = salaryRepository.findByEmployeeIdAndEmployeeDeletedIsFalse(employee.getId())
         .orElseThrow(
-            () -> new EmployeeNotFoundException(Map.of("employeeId", employee.getId())));
+            () -> new SalaryNotFoundException(Map.of("employeeId", employee.getId())));
 
     return salaryMapper.toResponse(salary);
   }

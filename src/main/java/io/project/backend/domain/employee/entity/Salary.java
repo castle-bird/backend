@@ -50,11 +50,7 @@ public class Salary extends BaseTimeEntity {
   }
 
   public void updateSalary(BigDecimal monthSalary, BigDecimal yearSalary) {
-    if (monthSalary != null) {
-      this.monthSalary = monthSalary;
-    }
-    if (yearSalary != null) {
-      this.yearSalary = yearSalary;
-    }
+    this.monthSalary = monthSalary;
+    this.yearSalary = yearSalary;
   }
 }
