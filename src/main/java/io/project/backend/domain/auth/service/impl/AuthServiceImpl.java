@@ -17,7 +17,7 @@ import io.project.backend.domain.employee.entity.EmployeePosition;
 import io.project.backend.domain.employee.exception.DepartmentNotFoundException;
 import io.project.backend.domain.employee.exception.EmployeeDuplicateException;
 import io.project.backend.domain.employee.exception.EmployeeNotFoundException;
-import io.project.backend.domain.employee.exception.PositonNotFoundException;
+import io.project.backend.domain.employee.exception.PositionNotFoundException;
 import io.project.backend.domain.employee.mapper.EmployeeMapper;
 import io.project.backend.domain.employee.repository.DepartmentRepository;
 import io.project.backend.domain.employee.repository.EmployeePositionRepository;
@@ -72,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
     // 직급 체크
     EmployeePosition employeePosition = employeePositionRepository.findByName(
             request.employeePosition())
-        .orElseThrow(() -> new PositonNotFoundException(
+        .orElseThrow(() -> new PositionNotFoundException(
             Map.of("employeePosition", request.employeePosition())));
 
     // 사원번호(날짜 + 입사자 수)생성
