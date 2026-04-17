@@ -42,19 +42,39 @@ public class SalaryServiceImpl implements SalaryService {
 
   @Override
   @Transactional(readOnly = true)
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
   public SalaryResponse getSalary(Long employeeId) {
-    return null;
+    Salary salary = salaryRepository.findByEmployeeIdAndEmployeeDeletedIsFalse(employeeId)
+        .orElseThrow(
+            () -> new EmployeeNotFoundException(Map.of("employeeId", employeeId)));
+
+    return salaryMapper.toResponse(salary);
   }
 
   @Override
   @Transactional(readOnly = true)
   public SalaryResponse getSalaryMe(UserDetails userDetails) {
-    return null;
+    Employee employee = employeeRepository.findByEmailAndDeletedFalse(userDetails.getUsername())
+        .orElseThrow(
+            () -> new EmployeeNotFoundException(Map.of("email", userDetails.getUsername())));
+
+    Salary salary = salaryRepository.findByEmployeeIdAndEmployeeDeletedIsFalse(employee.getId())
+        .orElseThrow(
+            () -> new EmployeeNotFoundException(Map.of("employeeId", employee.getId())));
+
+    return salaryMapper.toResponse(salary);
   }
 
   @Override
   @Transactional
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
   public void updateSalary(Long employeeId, SalaryUpdateRequest request) {
+    Salary salary = salaryRepository.findByEmployeeIdAndEmployeeDeletedIsFalse(employeeId)
+        .orElseThrow(
+            () -> new EmployeeNotFoundException(Map.of("employeeId", employeeId)));
 
+    salary.updateSalary(request.monthSalary(), request.yearSalary());
+
+    salaryRepository.save(salary);
   }
 }

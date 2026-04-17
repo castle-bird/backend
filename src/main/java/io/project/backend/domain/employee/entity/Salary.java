@@ -48,4 +48,13 @@ public class Salary extends BaseTimeEntity {
   public void updatePaymentDay(Short paymentDay) {
     this.paymentDay = paymentDay;
   }
+
+  public void updateSalary(BigDecimal monthSalary, BigDecimal yearSalary) {
+    if (monthSalary != null) {
+      this.monthSalary = monthSalary;
+    }
+    if (yearSalary != null) {
+      this.yearSalary = yearSalary;
+    }
+  }
 }
