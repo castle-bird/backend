@@ -38,7 +38,9 @@ public class DataInitializer implements CommandLineRunner {
   @Transactional
   public void run(String... args) {
     if (employeeRepository.existsByEmail(adminProperties.email())) {
-      log.debug("관리자 계정이 이미 존재합니다. 초기화를 건너뜁니다.");
+      log.debug("=====================================================================================================");
+      log.debug("=========================== 관리자 계정이 이미 존재합니다. 초기화를 건너뜁니다. ===========================");
+      log.debug("=====================================================================================================");
       return;
     }
 
@@ -63,6 +65,8 @@ public class DataInitializer implements CommandLineRunner {
 
     employeeRepository.save(admin);
 
-    log.info("초기 관리자 계정을 생성했습니다. 이메일: {}", adminProperties.email());
+    log.info("=====================================================================================================");
+    log.info("======================== 초기 관리자 계정을 생성했습니다. 이메일: {} ========================", adminProperties.email());
+    log.info("=====================================================================================================");
   }
 }
