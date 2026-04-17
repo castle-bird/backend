@@ -4,16 +4,20 @@ import io.project.backend.domain.auth.repository.RefreshTokenRedisRepository;
 import io.project.backend.domain.employee.dto.common.DepartmentListDto;
 import io.project.backend.domain.employee.dto.common.PositionListDto;
 import io.project.backend.domain.employee.dto.request.UpdateEmployeeRequest;
+import io.project.backend.domain.employee.dto.response.EmployeeListResponse;
+import io.project.backend.domain.employee.dto.response.EmployeeResponse;
 import io.project.backend.domain.employee.entity.Department;
 import io.project.backend.domain.employee.entity.Employee;
 import io.project.backend.domain.employee.entity.EmployeePosition;
 import io.project.backend.domain.employee.exception.DepartmentNotFoundException;
 import io.project.backend.domain.employee.exception.EmployeeDuplicateException;
 import io.project.backend.domain.employee.exception.EmployeeNotFoundException;
+import io.project.backend.domain.employee.mapper.EmployeeMapper;
 import io.project.backend.domain.employee.repository.DepartmentRepository;
 import io.project.backend.domain.employee.repository.EmployeePositionRepository;
 import io.project.backend.domain.employee.repository.EmployeeRepository;
 import io.project.backend.domain.employee.service.EmployeeService;
+import io.project.backend.global.security.details.UserDetailsImpl;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +35,7 @@ public class EmployeeServiceImpl implements EmployeeService {
   private final DepartmentRepository departmentRepository;
   private final EmployeePositionRepository employeePositionRepository;
   private final RefreshTokenRedisRepository refreshTokenRedisRepository;
+  private final EmployeeMapper employeeMapper;
 
   @Override
   @Transactional(readOnly = true)
@@ -91,5 +96,52 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     // 변경된 직원 정보 저장
     employeeRepository.save(employee);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public EmployeeResponse getEmployee(Long id) {
+
+    Employee find = employeeRepository.findByIdAndDeletedFalse(id)
+        .orElseThrow(() -> new EmployeeNotFoundException(Map.of("userId", id)));
+
+    return employeeMapper.toEmployeeResponse(find);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public EmployeeListResponse getEmployeeList(
+      String department,
+      String position,
+      Long cursor,
+      int size
+  ) {
+
+    List<Employee> employees = employeeRepository.findAllByCursor(
+        department,
+        position,
+        cursor,
+        size
+    );
+
+    boolean hasNext = employees.size() > size;
+    List<EmployeeResponse> responses = employees.stream()
+        .limit(hasNext ? size : employees.size())
+        .map(employeeMapper::toEmployeeResponse)
+        .toList();
+
+    return EmployeeListResponse.from(responses,  hasNext);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public EmployeeResponse getMe(UserDetailsImpl userDetails) {
+
+    Long userId = userDetails.getUserId();
+
+    Employee find = employeeRepository.findByIdAndDeletedFalse(userId)
+        .orElseThrow(() -> new EmployeeNotFoundException(Map.of("userId", userId)));
+
+    return employeeMapper.toEmployeeResponse(find);
   }
 }

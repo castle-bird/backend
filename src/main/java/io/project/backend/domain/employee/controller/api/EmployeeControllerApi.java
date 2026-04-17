@@ -2,6 +2,7 @@ package io.project.backend.domain.employee.controller.api;
 
 import io.project.backend.domain.employee.dto.request.UpdateEmployeeRequest;
 import io.project.backend.domain.employee.dto.response.DepartmentListResponse;
+import io.project.backend.domain.employee.dto.response.EmployeeListResponse;
 import io.project.backend.domain.employee.dto.response.EmployeeResponse;
 import io.project.backend.domain.employee.dto.response.PositionListResponse;
 import io.project.backend.global.response.CommonApiResponse;
@@ -11,9 +12,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.data.domain.Pageable;
 import java.util.List;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 
 @Tag(name = "Employee", description = "직원 관련 API")
@@ -67,10 +66,11 @@ public interface EmployeeControllerApi {
       @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content),
       @ApiResponse(responseCode = "404", description = "직원 없음", content = @Content)
   })
-  ResponseEntity<CommonApiResponse<Page<EmployeeResponse>>> getEmployeeList(
+  ResponseEntity<CommonApiResponse<EmployeeListResponse>> getEmployeeList(
       String department,
       String position,
-      Pageable pageable
+      Long cursor,
+      int size
   );
 
   @Operation(summary = "본인의 정보를 조회", description = "본인의 정보를 조회합니다.")

@@ -1,6 +1,7 @@
 package io.project.backend.domain.employee.mapper;
 
 import io.project.backend.domain.auth.dto.request.SignupRequest;
+import io.project.backend.domain.employee.dto.response.EmployeeResponse;
 import io.project.backend.domain.employee.entity.Department;
 import io.project.backend.domain.employee.entity.Employee;
 import io.project.backend.domain.employee.entity.EmployeePosition;
@@ -29,4 +30,16 @@ public interface EmployeeMapper {
       Department department,
       EmployeePosition employeePosition
   );
+
+  // 조회 응답 매핑
+  EmployeeResponse toEmployeeResponse(Employee employee);
+
+  // Department와 EmployeePosition을 String으로 매핑
+  default String getDepartmentName(Department department) {
+    return department == null ? null : department.getName();
+  }
+
+  default String getPositionName(EmployeePosition employeePosition) {
+    return employeePosition == null ? null : employeePosition.getName();
+  }
 }

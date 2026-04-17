@@ -5,18 +5,16 @@ import io.project.backend.domain.employee.dto.common.DepartmentListDto;
 import io.project.backend.domain.employee.dto.common.PositionListDto;
 import io.project.backend.domain.employee.dto.request.UpdateEmployeeRequest;
 import io.project.backend.domain.employee.dto.response.DepartmentListResponse;
+import io.project.backend.domain.employee.dto.response.EmployeeListResponse;
 import io.project.backend.domain.employee.dto.response.EmployeeResponse;
 import io.project.backend.domain.employee.dto.response.PositionListResponse;
 import io.project.backend.domain.employee.service.EmployeeService;
 import io.project.backend.global.response.CommonApiResponse;
 import io.project.backend.global.security.details.UserDetailsImpl;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Pageable;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -92,17 +90,33 @@ public class EmployeeController implements EmployeeControllerApi {
   @Override
   @GetMapping("/{id}")
   public ResponseEntity<CommonApiResponse<EmployeeResponse>> getEmployee(@PathVariable Long id) {
-    return null;
+
+    EmployeeResponse employeeResponse = employeeService.getEmployee(id);
+
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(CommonApiResponse.ok(employeeResponse));
   }
 
   @Override
-  @GetMapping("/")
-  public ResponseEntity<CommonApiResponse<Page<EmployeeResponse>>> getEmployeeList(
+  @GetMapping
+  public ResponseEntity<CommonApiResponse<EmployeeListResponse>> getEmployeeList(
       @RequestParam(required = false) String department,
       @RequestParam(required = false) String position,
-      @PageableDefault(size = 20, sort = "name") Pageable pageable
+      @RequestParam(required = false) Long cursor,
+      @RequestParam(defaultValue = "20") int size
   ) {
-    return null;
+
+    EmployeeListResponse employeeListResponse = employeeService.getEmployeeList(
+        department,
+        position,
+        cursor,
+        size
+    );
+
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(CommonApiResponse.ok(employeeListResponse));
   }
 
   @Override
@@ -110,6 +124,11 @@ public class EmployeeController implements EmployeeControllerApi {
   public ResponseEntity<CommonApiResponse<EmployeeResponse>> getMe(
       @AuthenticationPrincipal UserDetailsImpl userDetails
   ) {
-    return null;
+
+    EmployeeResponse employeeResponse = employeeService.getMe(userDetails);
+
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(CommonApiResponse.ok(employeeResponse));
   }
 }
