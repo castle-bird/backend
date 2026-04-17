@@ -5,21 +5,28 @@ import io.project.backend.domain.employee.dto.common.DepartmentListDto;
 import io.project.backend.domain.employee.dto.common.PositionListDto;
 import io.project.backend.domain.employee.dto.request.UpdateEmployeeRequest;
 import io.project.backend.domain.employee.dto.response.DepartmentListResponse;
+import io.project.backend.domain.employee.dto.response.EmployeeResponse;
 import io.project.backend.domain.employee.dto.response.PositionListResponse;
 import io.project.backend.domain.employee.service.EmployeeService;
 import io.project.backend.global.response.CommonApiResponse;
+import io.project.backend.global.security.details.UserDetailsImpl;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -80,5 +87,29 @@ public class EmployeeController implements EmployeeControllerApi {
     return ResponseEntity
         .status(HttpStatus.NO_CONTENT)
         .body(CommonApiResponse.ok(null));
+  }
+
+  @Override
+  @GetMapping("/{id}")
+  public ResponseEntity<CommonApiResponse<EmployeeResponse>> getEmployee(@PathVariable Long id) {
+    return null;
+  }
+
+  @Override
+  @GetMapping("/")
+  public ResponseEntity<CommonApiResponse<Page<EmployeeResponse>>> getEmployeeList(
+      @RequestParam(required = false) String department,
+      @RequestParam(required = false) String position,
+      @PageableDefault(size = 20, sort = "name") Pageable pageable
+  ) {
+    return null;
+  }
+
+  @Override
+  @GetMapping("/me")
+  public ResponseEntity<CommonApiResponse<EmployeeResponse>> getMe(
+      @AuthenticationPrincipal UserDetailsImpl userDetails
+  ) {
+    return null;
   }
 }

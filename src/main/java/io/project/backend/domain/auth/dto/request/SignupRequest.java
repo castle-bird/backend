@@ -36,8 +36,11 @@ public record SignupRequest(
     String address,
 
     @NotBlank(message = "연락처는 필수 입력값입니다.")
-    @Size(max = 20, message = "연락처는 20자 이하여야 합니다.")
-    @Pattern(regexp = "^[0-9-]{9,20}$", message = "연락처는 숫자와 '-'만 입력 가능합니다.")
+    @Pattern(
+        regexp = "^(01[016789]-\\d{3,4}-\\d{4}|02-\\d{3,4}-\\d{4}|0[3-9]\\d-\\d{3,4}-\\d{4})$",
+        message = "올바른 전화번호 형식이 아닙니다. (예: 010-1234-5678)"
+    )
+    @Size(max = 13, message = "연락처는 13자 이하여야 합니다.")
     String phone
 ) {
 
