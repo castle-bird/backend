@@ -12,6 +12,7 @@ import io.project.backend.domain.employee.entity.EmployeePosition;
 import io.project.backend.domain.employee.exception.DepartmentNotFoundException;
 import io.project.backend.domain.employee.exception.EmployeeDuplicateException;
 import io.project.backend.domain.employee.exception.EmployeeNotFoundException;
+import io.project.backend.domain.employee.exception.PositionNotFoundException;
 import io.project.backend.domain.employee.mapper.EmployeeMapper;
 import io.project.backend.domain.employee.repository.DepartmentRepository;
 import io.project.backend.domain.employee.repository.EmployeePositionRepository;
@@ -84,7 +85,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     EmployeePosition employeePosition = employeePositionRepository.findByName(
             request.employeePosition())
-        .orElseThrow(() -> new EmployeeNotFoundException(
+        .orElseThrow(() -> new PositionNotFoundException(
             Map.of("employeePositionName", request.employeePosition())));
 
     // 직원 정보 업데이트
