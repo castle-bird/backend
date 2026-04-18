@@ -4,11 +4,13 @@ import io.project.backend.domain.reservation.controller.api.MeetingRoomControlle
 import io.project.backend.domain.reservation.dto.request.MeetingRoomCreateRequest;
 import io.project.backend.domain.reservation.dto.request.MeetingRoomUpdateRequest;
 import io.project.backend.domain.reservation.dto.response.MeetingRoomResponse;
+import io.project.backend.domain.reservation.service.MeetingRoomService;
 import io.project.backend.global.response.CommonApiResponse;
 import io.project.backend.global.security.details.UserDetailsImpl;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,6 +28,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/rooms")
 public class MeetingRoomController implements MeetingRoomControllerApi {
 
+  private final MeetingRoomService meetingRoomService;
+
   @Override
   @PostMapping
   @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
@@ -33,7 +37,12 @@ public class MeetingRoomController implements MeetingRoomControllerApi {
       @AuthenticationPrincipal UserDetailsImpl userDetails,
       @Valid @RequestBody MeetingRoomCreateRequest request
   ) {
-    return null;
+
+    meetingRoomService.createMeetingRoom(userDetails, request);
+
+    return ResponseEntity
+        .status(HttpStatus.CREATED)
+        .body(CommonApiResponse.created(null));
   }
 
   @Override

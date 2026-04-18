@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -86,6 +87,25 @@ public class GlobalExceptionHandler {
 
     return ResponseEntity
         .status(HttpStatus.BAD_REQUEST)
+        .body(errorResponse);
+  }
+
+  /** @PreAuthorize 등 메서드 권한 체크 실패 */
+  @ExceptionHandler(AccessDeniedException.class)
+  public ResponseEntity<ErrorResponse> handleAccessDeniedException(
+      AccessDeniedException e,
+      HttpServletRequest request
+  ) {
+    log.warn("[AccessDeniedException] - URI: {}, Message: {}", request.getRequestURI(), e.getMessage());
+
+    ErrorResponse errorResponse = ErrorResponse.of(
+        ErrorCode.ACCESS_DENIED,
+        request.getRequestURI(),
+        Map.of("request", "해당 리소스에 접근할 권한이 없습니다.")
+    );
+
+    return ResponseEntity
+        .status(HttpStatus.FORBIDDEN)
         .body(errorResponse);
   }
 
