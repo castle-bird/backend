@@ -1,7 +1,14 @@
 package io.project.backend.domain.reservation.repository;
 
+import io.project.backend.domain.employee.entity.Employee;
 import io.project.backend.domain.reservation.entity.RoomReservation;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface RoomReservationRepository extends JpaRepository<RoomReservation, Long> {
+public interface RoomReservationRepository extends JpaRepository<RoomReservation, Long>,
+    RoomReservationRepositoryCustom {
+
+  RoomReservation findByEmployee(Employee employee);
+
+  List<RoomReservation> findAllByEmployee(Employee employee);
 }
