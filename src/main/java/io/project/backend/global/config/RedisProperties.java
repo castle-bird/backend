@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "app.cache.redis")
+@ConfigurationProperties(prefix = "app.redis")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -16,11 +16,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class RedisProperties {
 
   private Duration defaultTtl;
-  private Map<String, CacheSpec> caches;
-
-  public record CacheSpec(
-      Duration ttl
-  ) {
-
-  }
+  private Map<String, Duration> caches;
 }
