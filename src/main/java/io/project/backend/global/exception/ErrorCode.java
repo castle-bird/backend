@@ -23,7 +23,14 @@ public enum ErrorCode {
   DEPARTMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "E003", "존재하지 않는 부서입니다."),
   POSITION_INVALID(HttpStatus.BAD_REQUEST, "E004", "존재하지 않는 직급입니다."),
   SALARY_DUPLICATE(HttpStatus.CONFLICT, "E005", "이미 등록된 급여 정보가 존재합니다."),
-  SALARY_NOT_FOUND(HttpStatus.NOT_FOUND, "E006", "급여 정보가 존재하지 않습니다.");
+  SALARY_NOT_FOUND(HttpStatus.NOT_FOUND, "E006", "급여 정보가 존재하지 않습니다."),
+
+  // Reservation
+  MEETING_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "R001", "존재하지 않는 회의실입니다."),
+  MEETING_ROOM_NOT_ACTIVE(HttpStatus.BAD_REQUEST, "R002", "비활성화된 회의실입니다."),
+  RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "R003", "존재하지 않는 예약입니다."),
+  RESERVATION_NOT_OWNED(HttpStatus.FORBIDDEN, "R004", "예약 변경에 대한 권한이 없습니다."),
+  RESERVATION_TIME_CONFLICT(HttpStatus.CONFLICT, "R005", "해당 시간에 이미 예약이 존재합니다.");
 
   private final HttpStatus status;
   private final String customCode;
