@@ -6,14 +6,12 @@ import io.project.backend.domain.reservation.dto.request.MeetingRoomUpdateReques
 import io.project.backend.domain.reservation.dto.response.MeetingRoomResponse;
 import io.project.backend.domain.reservation.service.MeetingRoomService;
 import io.project.backend.global.response.CommonApiResponse;
-import io.project.backend.global.security.details.UserDetailsImpl;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,11 +32,10 @@ public class MeetingRoomController implements MeetingRoomControllerApi {
   @PostMapping
   @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
   public ResponseEntity<CommonApiResponse<Void>> createMeetingRoom(
-      @AuthenticationPrincipal UserDetailsImpl userDetails,
       @Valid @RequestBody MeetingRoomCreateRequest request
   ) {
 
-    meetingRoomService.createMeetingRoom(userDetails, request);
+    meetingRoomService.createMeetingRoom(request);
 
     return ResponseEntity
         .status(HttpStatus.CREATED)
@@ -49,11 +46,15 @@ public class MeetingRoomController implements MeetingRoomControllerApi {
   @PutMapping("/{id}")
   @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
   public ResponseEntity<CommonApiResponse<Void>> updateMeetingRoom(
-      @AuthenticationPrincipal UserDetailsImpl userDetails,
       @PathVariable Long id,
       @Valid @RequestBody MeetingRoomUpdateRequest request
   ) {
-    return null;
+
+    meetingRoomService.updateMeetingRoom(id, request);
+
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(CommonApiResponse.created(null));
   }
 
   @Override

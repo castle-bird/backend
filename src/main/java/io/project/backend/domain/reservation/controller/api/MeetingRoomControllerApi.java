@@ -4,7 +4,6 @@ import io.project.backend.domain.reservation.dto.request.MeetingRoomCreateReques
 import io.project.backend.domain.reservation.dto.request.MeetingRoomUpdateRequest;
 import io.project.backend.domain.reservation.dto.response.MeetingRoomResponse;
 import io.project.backend.global.response.CommonApiResponse;
-import io.project.backend.global.security.details.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -23,7 +22,6 @@ public interface MeetingRoomControllerApi {
       @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content)
   })
   ResponseEntity<CommonApiResponse<Void>> createMeetingRoom(
-      UserDetailsImpl userDetails,
       MeetingRoomCreateRequest request
   );
 
@@ -35,7 +33,6 @@ public interface MeetingRoomControllerApi {
       @ApiResponse(responseCode = "404", description = "회의실 없음", content = @Content)
   })
   ResponseEntity<CommonApiResponse<Void>> updateMeetingRoom(
-      UserDetailsImpl userDetails,
       Long id,
       MeetingRoomUpdateRequest request
   );
