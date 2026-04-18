@@ -54,14 +54,20 @@ public class MeetingRoomController implements MeetingRoomControllerApi {
 
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(CommonApiResponse.created(null));
+        .body(CommonApiResponse.ok(null));
   }
 
   @Override
   @GetMapping("/{id}")
   public ResponseEntity<CommonApiResponse<MeetingRoomResponse>> getMeetingRoom(
-      @PathVariable Long id) {
-    return null;
+      @PathVariable Long id
+  ) {
+
+    MeetingRoomResponse response = meetingRoomService.getMeetingRoom(id);
+
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(CommonApiResponse.ok(response));
   }
 
   @Override
@@ -69,6 +75,11 @@ public class MeetingRoomController implements MeetingRoomControllerApi {
   public ResponseEntity<CommonApiResponse<List<MeetingRoomResponse>>> getMeetingRoomList(
       @RequestParam(defaultValue = "true") Boolean active
   ) {
-    return null;
+
+    List<MeetingRoomResponse> response = meetingRoomService.getMeetingRoomList(active);
+
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(CommonApiResponse.ok(response));
   }
 }

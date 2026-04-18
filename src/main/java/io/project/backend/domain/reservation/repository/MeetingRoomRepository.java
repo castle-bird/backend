@@ -11,5 +11,7 @@ public interface MeetingRoomRepository extends JpaRepository<MeetingRoom, Long> 
 
   Optional<MeetingRoom> findByName(String name);
 
+  boolean existsByNameAndIdNot(String name, Long id);
+
   boolean existsByName(String name);
 }

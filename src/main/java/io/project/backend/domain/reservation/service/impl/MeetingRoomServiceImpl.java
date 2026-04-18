@@ -48,8 +48,8 @@ public class MeetingRoomServiceImpl implements MeetingRoomService {
     MeetingRoom meetingRoom = meetingRoomRepository.findById(roomId)
         .orElseThrow(() -> new MeetingRoomNotFoundException(Map.of("roomId", roomId)));
 
-    // 회의실 이름 중복 체크
-    if (meetingRoomRepository.existsByName(request.name())) {
+    // 회의실 이름 중복 체크 (자기 자신 제외)
+    if (meetingRoomRepository.existsByNameAndIdNot(request.name(), roomId)) {
       throw new MeetingRoomDuplicateException(
           Map.of("name", request.name())
       );
@@ -60,11 +60,20 @@ public class MeetingRoomServiceImpl implements MeetingRoomService {
 
   @Override
   public MeetingRoomResponse getMeetingRoom(Long roomId) {
-    return null;
+
+    MeetingRoom meetingRoom = meetingRoomRepository.findById(roomId)
+        .orElseThrow(() -> new MeetingRoomNotFoundException(Map.of("roomId", roomId)));
+
+    return meetingRoomMapper.toResponseForEntity(meetingRoom);
   }
 
   @Override
   public List<MeetingRoomResponse> getMeetingRoomList(Boolean active) {
-    return List.of();
+
+    List<MeetingRoom> meetingRooms = meetingRoomRepository.findAllByActiveIs(active);
+
+    return meetingRooms.stream()
+        .map(meetingRoomMapper::toResponseForEntity)
+        .toList();
   }
 }

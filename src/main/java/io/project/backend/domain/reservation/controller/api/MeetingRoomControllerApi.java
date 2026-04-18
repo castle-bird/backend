@@ -17,7 +17,7 @@ public interface MeetingRoomControllerApi {
 
   @Operation(summary = "회의실 등록", description = "새로운 회의실을 등록합니다.")
   @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "등록 성공"),
+      @ApiResponse(responseCode = "201", description = "등록 성공"),
       @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content),
       @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content)
   })
