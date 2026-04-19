@@ -88,4 +88,22 @@ public class ReservationServiceImpl implements ReservationService {
 
     return reservationMapper.toResponseForEntity(reservation);
   }
+
+  @Override
+  @Transactional
+  public void cancelReservation(Long employeeId, Long reservationId) {
+
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<ReservationResponse> getReservationMe(Long employeeId) {
+    return List.of();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<ReservationResponse> getReservations(Long roomId) {
+    return List.of();
+  }
 }
