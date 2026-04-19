@@ -30,9 +30,9 @@ public enum ErrorCode {
   MEETING_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "R001", "존재하지 않는 회의실입니다."),
   MEETING_ROOM_NOT_ACTIVE(HttpStatus.BAD_REQUEST, "R002", "비활성화된 회의실입니다."),
   MEETING_ROOM_DUPLICATE(HttpStatus.CONFLICT, "R003", "이미 존재하는 회의실입니다."),
-  RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "R003", "존재하지 않는 예약입니다."),
-  RESERVATION_NOT_OWNED(HttpStatus.FORBIDDEN, "R004", "예약 변경에 대한 권한이 없습니다."),
-  RESERVATION_TIME_CONFLICT(HttpStatus.CONFLICT, "R005", "해당 시간에 이미 예약이 존재합니다.");
+  RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "R004", "존재하지 않는 예약입니다."),
+  RESERVATION_NOT_OWNED(HttpStatus.FORBIDDEN, "R005", "예약 변경에 대한 권한이 없습니다."),
+  RESERVATION_TIME_CONFLICT(HttpStatus.CONFLICT, "R006", "해당 시간에 이미 예약이 존재합니다.");
 
   private final HttpStatus status;
   private final String customCode;
