@@ -28,6 +28,7 @@ spring:
     open-in-view: false  # 트랜잭션 범위 밖 LAZY 로딩 방지
     properties:
       hibernate:
+        format_sql: true
         jdbc:
           batch_size: 20  # 쓰기 최적화: 20개씩 묶어서 전송 (?reWriteBatchedInserts=true 연동)
         order_inserts: true
@@ -56,12 +57,11 @@ springdoc:
 app:
 
   # Redis 캐시 TTL 설정 (초 단위)
-  cache:
-    redis:
-      default-ttl: 3600s
-      caches:
-        userCache:
-          ttl: 1800s
+  redis:
+    default-ttl: 600s
+    caches:
+      employeeCache: 1800s
+      reservationCache: 1800s
 
   jwt:
     secret-key: ${JWT_SECRET_KEY}

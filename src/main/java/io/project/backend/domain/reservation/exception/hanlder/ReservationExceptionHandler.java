@@ -1,6 +1,6 @@
-package io.project.backend.domain.employee.exception.handler;
+package io.project.backend.domain.reservation.exception.hanlder;
 
-import io.project.backend.domain.employee.exception.EmployeeException;
+import io.project.backend.domain.reservation.exception.ReservationException;
 import io.project.backend.global.response.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -10,14 +10,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 @RequiredArgsConstructor
-public class EmployeeExceptionHandler {
+public class ReservationExceptionHandler {
 
-  @ExceptionHandler(EmployeeException.class)
-  public ResponseEntity<ErrorResponse> handleEmployeeException(
-      EmployeeException e,
+  @ExceptionHandler(ReservationException.class)
+  public ResponseEntity<ErrorResponse> handleReservationException(
+      ReservationException e,
       HttpServletRequest request
   ) {
-
     return ResponseEntity
         .status(e.getErrorCode().getStatus())
         .body(ErrorResponse.of(

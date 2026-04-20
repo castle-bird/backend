@@ -31,16 +31,9 @@ public class MeetingRoom extends BaseTimeEntity {
     this.active = true;
   }
 
-  public void deactivate() {
-    this.active = false;
-  }
-
-  public void activate() {
-    this.active = true;
-  }
-
-  public void updateInfo(String name, String location) {
+  public void updateInfo(String name, String location, boolean active) {
     this.name = name;
     this.location = location;
+    this.active = active;
   }
 }

@@ -44,7 +44,7 @@ public class RoomReservation extends BaseTimeEntity {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, columnDefinition = "reservation_status")
   @ColumnTransformer(read = "status::text", write = "?::reservation_status")
-  private ReservationStatus status;
+  private ReservationStatus status = ReservationStatus.CONFIRMED;
 
   // JPA 레벨 낙관적 잠금으로 동시 수정 충돌 감지
   @Version
@@ -64,7 +64,6 @@ public class RoomReservation extends BaseTimeEntity {
     this.purpose = purpose;
     this.startTime = startTime;
     this.endTime = endTime;
-    this.status = ReservationStatus.CONFIRMED;
   }
 
   public void cancel() {
