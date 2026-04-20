@@ -1,6 +1,8 @@
 package io.project.backend.domain.notification.service;
 
 import io.project.backend.domain.notification.entity.NotificationType;
+import io.project.backend.domain.notification.dto.response.NotificationResponse;
+import java.util.List;
 
 public interface NotificationService {
 
@@ -34,5 +36,6 @@ public interface NotificationService {
       String title,
       String message
   );
-}
 
+  List<NotificationResponse> getMyNotifications(Long recipientId);
+}
