@@ -18,6 +18,7 @@ import io.project.backend.domain.employee.repository.DepartmentRepository;
 import io.project.backend.domain.employee.repository.EmployeePositionRepository;
 import io.project.backend.domain.employee.repository.EmployeeRepository;
 import io.project.backend.domain.employee.service.EmployeeService;
+import io.project.backend.domain.notification.service.NotificationService;
 import io.project.backend.global.security.details.UserDetailsImpl;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ public class EmployeeServiceImpl implements EmployeeService {
   private final EmployeePositionRepository employeePositionRepository;
   private final RefreshTokenRedisRepository refreshTokenRedisRepository;
   private final EmployeeMapper employeeMapper;
+  private final NotificationService notificationService;
 
   @Override
   @Transactional(readOnly = true)
@@ -131,7 +133,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         .map(employeeMapper::toEmployeeResponse)
         .toList();
 
-    return EmployeeListResponse.from(responses,  hasNext);
+    return EmployeeListResponse.from(responses, hasNext);
   }
 
   @Override

@@ -9,7 +9,7 @@ CREATE TYPE notification_type AS ENUM (
     'RESERVATION_CANCELLED', -- 관리자/매니저가 타인 예약 취소 시 예약자에게 발송
     'FULL_NOTIFICATION',     -- 전사 공지 (recipient_id = NULL, 전체 발송)
     'SALARY_CHANGED',        -- 월급/연봉/보너스 변경 시 해당 직원에게 발송
-    'POSITION_CHANGED'       -- 직급/역할 변경 시 해당 직원에게 발송
+    'EMPLOYEE_CHANGED'       -- 직급/역할 변경 시 해당 직원에게 발송
     );
 
 -- btree_gist 확장 (EXCLUDE USING gist 사용을 위해 필요)
