@@ -51,7 +51,12 @@ public class ReservationController implements ReservationControllerApi {
       @AuthenticationPrincipal UserDetailsImpl userDetails,
       @PathVariable Long reservationId
   ) {
-    return null;
+
+    reservationService.cancelReservation(userDetails.getUserId(), reservationId);
+
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(CommonApiResponse.ok(null));
   }
 
   @Override

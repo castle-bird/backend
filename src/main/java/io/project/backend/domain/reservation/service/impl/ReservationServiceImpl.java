@@ -6,8 +6,12 @@ import io.project.backend.domain.employee.repository.EmployeeRepository;
 import io.project.backend.domain.reservation.dto.request.ReservationCreateRequest;
 import io.project.backend.domain.reservation.dto.response.ReservationResponse;
 import io.project.backend.domain.reservation.entity.MeetingRoom;
+import io.project.backend.domain.reservation.entity.ReservationStatus;
 import io.project.backend.domain.reservation.entity.RoomReservation;
 import io.project.backend.domain.reservation.exception.MeetingRoomNotFoundException;
+import io.project.backend.domain.reservation.exception.ReservationAlreadyCancelException;
+import io.project.backend.domain.reservation.exception.ReservationNotFoundException;
+import io.project.backend.domain.reservation.exception.ReservationNotOwnerException;
 import io.project.backend.domain.reservation.exception.ReservationTimeConflictException;
 import io.project.backend.domain.reservation.exception.ReservationTimeInvalidException;
 import io.project.backend.domain.reservation.mapper.ReservationMapper;
@@ -92,7 +96,26 @@ public class ReservationServiceImpl implements ReservationService {
   @Override
   @Transactional
   public void cancelReservation(Long employeeId, Long reservationId) {
+    // 예약 존재 여부 검증
+    RoomReservation reservation = roomReservationRepository.findById(reservationId)
+        .orElseThrow(() -> new ReservationNotFoundException(Map.of(
+            "reservationId", reservationId
+        )));
 
+    // 예약 소유자 검증
+    if (!reservation.getEmployee().getId().equals(employeeId)) {
+      throw new ReservationNotOwnerException(Map.of("reservationId", reservationId));
+    }
+
+    // 이미 취소된 예약인지 검증
+    if (reservation.getStatus() == ReservationStatus.CANCELLED) {
+      throw new ReservationAlreadyCancelException(Map.of(
+          "reservationId", reservationId
+      ));
+    }
+
+    // 예약 취소 (삭제)
+    reservation.cancel();
   }
 
   @Override

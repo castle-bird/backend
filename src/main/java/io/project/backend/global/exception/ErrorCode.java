@@ -33,7 +33,8 @@ public enum ErrorCode {
   RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "R004", "존재하지 않는 예약입니다."),
   RESERVATION_NOT_OWNED(HttpStatus.FORBIDDEN, "R005", "예약 변경에 대한 권한이 없습니다."),
   RESERVATION_TIME_CONFLICT(HttpStatus.CONFLICT, "R006", "해당 시간에 이미 예약이 존재합니다."),
-  RESERVATION_TIME_INVALID(HttpStatus.BAD_REQUEST, "R007", "예약 시간이 유효하지 않습니다.");
+  RESERVATION_TIME_INVALID(HttpStatus.BAD_REQUEST, "R007", "예약 시간이 유효하지 않습니다."),
+  RESERVATION_ALREADY_CANCELLED(HttpStatus.BAD_REQUEST, "R008", "이미 취소된 예약입니다.");
 
   private final HttpStatus status;
   private final String customCode;
