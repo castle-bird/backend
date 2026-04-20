@@ -64,7 +64,13 @@ public class ReservationController implements ReservationControllerApi {
   public ResponseEntity<CommonApiResponse<List<ReservationResponse>>> getReservationMe(
       @AuthenticationPrincipal UserDetailsImpl userDetails
   ) {
-    return null;
+
+    List<ReservationResponse> responses = reservationService.getReservationMe(
+        userDetails.getUserId());
+
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(CommonApiResponse.ok(responses));
   }
 
   @Override

@@ -7,4 +7,6 @@ import java.util.List;
 public interface RoomReservationRepositoryCustom {
 
   List<RoomReservation> findByRoomAndDateRange(Long roomId, Instant startTime, Instant endTime);
+
+  List<RoomReservation> findAllByEmployeeId(Long employeeId);
 }

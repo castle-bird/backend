@@ -121,7 +121,10 @@ public class ReservationServiceImpl implements ReservationService {
   @Override
   @Transactional(readOnly = true)
   public List<ReservationResponse> getReservationMe(Long employeeId) {
-    return List.of();
+
+    List<RoomReservation> reservations = roomReservationRepository.findAllByEmployeeId(employeeId);
+
+    return reservations.stream().map(reservationMapper::toResponseForEntity).toList();
   }
 
   @Override
