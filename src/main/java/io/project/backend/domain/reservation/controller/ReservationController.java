@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import java.time.LocalDate;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -76,10 +77,11 @@ public class ReservationController implements ReservationControllerApi {
   @Override
   @GetMapping()
   public ResponseEntity<CommonApiResponse<List<ReservationResponse>>> getReservations(
-      @RequestParam Long roomId
+      @RequestParam Long roomId,
+      @RequestParam LocalDate date
   ) {
 
-    List<ReservationResponse> responses = reservationService.getReservations(roomId);
+    List<ReservationResponse> responses = reservationService.getReservations(roomId, date);
 
     return ResponseEntity
         .status(HttpStatus.OK)

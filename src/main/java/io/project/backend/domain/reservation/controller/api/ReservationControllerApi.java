@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 
@@ -55,6 +56,7 @@ public interface ReservationControllerApi {
       @ApiResponse(responseCode = "404", description = "회의실 없음", content = @Content)
   })
   ResponseEntity<CommonApiResponse<List<ReservationResponse>>> getReservations(
-      Long roomId
+      Long roomId,
+      LocalDate date
   );
 }

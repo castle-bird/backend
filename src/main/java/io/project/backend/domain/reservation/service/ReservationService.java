@@ -2,6 +2,7 @@ package io.project.backend.domain.reservation.service;
 
 import io.project.backend.domain.reservation.dto.request.ReservationCreateRequest;
 import io.project.backend.domain.reservation.dto.response.ReservationResponse;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface ReservationService {
@@ -12,5 +13,5 @@ public interface ReservationService {
 
   List<ReservationResponse> getReservationMe(Long employeeId);
 
-  List<ReservationResponse> getReservations(Long roomId);
+  List<ReservationResponse> getReservations(Long roomId, LocalDate date);
 }

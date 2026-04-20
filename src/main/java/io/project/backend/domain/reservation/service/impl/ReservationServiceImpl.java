@@ -19,6 +19,8 @@ import io.project.backend.domain.reservation.mapper.ReservationMapper;
 import io.project.backend.domain.reservation.repository.MeetingRoomRepository;
 import io.project.backend.domain.reservation.repository.RoomReservationRepository;
 import io.project.backend.domain.reservation.service.ReservationService;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -135,9 +137,14 @@ public class ReservationServiceImpl implements ReservationService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<ReservationResponse> getReservations(Long roomId) {
+  public List<ReservationResponse> getReservations(Long roomId, LocalDate date) {
 
-    List<RoomReservation> reservations = roomReservationRepository.findAllByRoomId(roomId);
+    Instant startOfDay = date.atStartOfDay(KOREA_ZONE).toInstant();
+    Instant endOfDay = date.atTime(LocalTime.MAX).atZone(KOREA_ZONE).toInstant();
+
+    List<RoomReservation> reservations = roomReservationRepository.findByRoomAndDateRange(
+        roomId, startOfDay, endOfDay
+    );
 
     return reservations.stream().map(reservationMapper::toResponseForEntity).toList();
   }
