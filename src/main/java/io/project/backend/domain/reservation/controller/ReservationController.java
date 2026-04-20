@@ -78,6 +78,11 @@ public class ReservationController implements ReservationControllerApi {
   public ResponseEntity<CommonApiResponse<List<ReservationResponse>>> getReservations(
       @RequestParam Long roomId
   ) {
-    return null;
+
+    List<ReservationResponse> responses = reservationService.getReservations(roomId);
+
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(CommonApiResponse.ok(responses));
   }
 }

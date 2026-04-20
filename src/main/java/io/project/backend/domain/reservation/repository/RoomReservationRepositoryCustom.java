@@ -9,4 +9,6 @@ public interface RoomReservationRepositoryCustom {
   List<RoomReservation> findByRoomAndDateRange(Long roomId, Instant startTime, Instant endTime);
 
   List<RoomReservation> findAllByEmployeeId(Long employeeId);
+
+  List<RoomReservation> findAllByRoomId(Long roomId);
 }

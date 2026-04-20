@@ -45,7 +45,18 @@ public class RoomReservationRepositoryImpl implements RoomReservationRepositoryC
         .selectFrom(reservation)
         .join(reservation.employee, employee).fetchJoin()
         .join(reservation.room, meetingRoom).fetchJoin()
-        .where(employee.id.eq(employeeId))
+        .where(reservation.employee.id.eq(employeeId))
+        .orderBy(reservation.startTime.desc())
+        .fetch();
+  }
+
+  @Override
+  public List<RoomReservation> findAllByRoomId(Long roomId) {
+    return queryFactory
+        .selectFrom(reservation)
+        .join(reservation.employee, employee).fetchJoin()
+        .join(reservation.room, meetingRoom).fetchJoin()
+        .where(reservation.room.id.eq(roomId))
         .orderBy(reservation.startTime.desc())
         .fetch();
   }

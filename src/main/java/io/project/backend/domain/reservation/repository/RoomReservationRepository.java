@@ -8,7 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface RoomReservationRepository extends JpaRepository<RoomReservation, Long>,
     RoomReservationRepositoryCustom {
 
-  RoomReservation findByEmployee(Employee employee);
-
   List<RoomReservation> findAllByEmployee(Employee employee);
 }

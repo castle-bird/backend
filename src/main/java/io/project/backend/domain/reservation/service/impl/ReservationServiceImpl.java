@@ -8,6 +8,7 @@ import io.project.backend.domain.reservation.dto.response.ReservationResponse;
 import io.project.backend.domain.reservation.entity.MeetingRoom;
 import io.project.backend.domain.reservation.entity.ReservationStatus;
 import io.project.backend.domain.reservation.entity.RoomReservation;
+import io.project.backend.domain.reservation.exception.MeetingRoomNotActiveException;
 import io.project.backend.domain.reservation.exception.MeetingRoomNotFoundException;
 import io.project.backend.domain.reservation.exception.ReservationAlreadyCancelException;
 import io.project.backend.domain.reservation.exception.ReservationNotFoundException;
@@ -47,6 +48,14 @@ public class ReservationServiceImpl implements ReservationService {
       Long employeeId,
       ReservationCreateRequest request
   ) {
+    // 회의실 존재 여부 검증 및 활성화 여부
+    MeetingRoom meetingRoom = meetingRoomRepository.findById(request.roomId())
+        .orElseThrow(() -> new MeetingRoomNotFoundException(Map.of("roomId", request.roomId())));
+
+    if (!meetingRoom.isActive()) {
+      throw new MeetingRoomNotActiveException(Map.of("roomId", request.roomId()));
+    }
+
     // 시간 유효성 검증: 예약 시작 시간이 종료 시간보다 이전인지 확인
     if (!request.startTime().isBefore(request.endTime())) {
       throw new ReservationTimeInvalidException(Map.of(
@@ -82,9 +91,6 @@ public class ReservationServiceImpl implements ReservationService {
     // 예약 생성
     Employee employee = employeeRepository.findById(employeeId)
         .orElseThrow(() -> new EmployeeNotFoundException(Map.of("employeeId", employeeId)));
-
-    MeetingRoom meetingRoom = meetingRoomRepository.findById(request.roomId())
-        .orElseThrow(() -> new MeetingRoomNotFoundException(Map.of("roomId", request.roomId())));
 
     RoomReservation reservation = roomReservationRepository.save(
         reservationMapper.toEntityForCreate(employee, meetingRoom, request)
@@ -130,6 +136,9 @@ public class ReservationServiceImpl implements ReservationService {
   @Override
   @Transactional(readOnly = true)
   public List<ReservationResponse> getReservations(Long roomId) {
-    return List.of();
+
+    List<RoomReservation> reservations = roomReservationRepository.findAllByRoomId(roomId);
+
+    return reservations.stream().map(reservationMapper::toResponseForEntity).toList();
   }
 }
