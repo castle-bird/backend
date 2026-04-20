@@ -4,6 +4,7 @@ import io.project.backend.domain.employee.dto.request.SalaryRegisterRequest;
 import io.project.backend.domain.employee.dto.request.SalaryUpdateRequest;
 import io.project.backend.domain.employee.dto.response.SalaryResponse;
 import io.project.backend.global.response.CommonApiResponse;
+import io.project.backend.global.security.details.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -51,5 +52,9 @@ public interface SalaryControllerApi {
       @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content),
       @ApiResponse(responseCode = "404", description = "직원 또는 급여 정보 없음", content = @Content)
   })
-  ResponseEntity<CommonApiResponse<Void>> updateSalary(Long employeeId, SalaryUpdateRequest request);
+  ResponseEntity<CommonApiResponse<Void>> updateSalary(
+      UserDetailsImpl userDetails,
+      Long employeeId,
+      SalaryUpdateRequest request
+  );
 }

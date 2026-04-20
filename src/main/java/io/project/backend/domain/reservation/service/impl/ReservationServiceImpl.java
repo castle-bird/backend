@@ -1,8 +1,11 @@
 package io.project.backend.domain.reservation.service.impl;
 
 import io.project.backend.domain.employee.entity.Employee;
+import io.project.backend.domain.employee.entity.EmployeeRole;
 import io.project.backend.domain.employee.exception.EmployeeNotFoundException;
 import io.project.backend.domain.employee.repository.EmployeeRepository;
+import io.project.backend.domain.notification.entity.NotificationType;
+import io.project.backend.domain.notification.service.NotificationService;
 import io.project.backend.domain.reservation.dto.request.ReservationCreateRequest;
 import io.project.backend.domain.reservation.dto.response.ReservationResponse;
 import io.project.backend.domain.reservation.entity.MeetingRoom;
@@ -43,6 +46,7 @@ public class ReservationServiceImpl implements ReservationService {
   private final EmployeeRepository employeeRepository;
   private final MeetingRoomRepository meetingRoomRepository;
   private final ReservationMapper reservationMapper;
+  private final NotificationService notificationService;
 
   @Override
   @Transactional
@@ -104,14 +108,21 @@ public class ReservationServiceImpl implements ReservationService {
   @Override
   @Transactional
   public void cancelReservation(Long employeeId, Long reservationId) {
+    Employee actor = employeeRepository.findByIdAndDeletedFalse(employeeId)
+        .orElseThrow(() -> new EmployeeNotFoundException(Map.of("employeeId", employeeId)));
+
     // 예약 존재 여부 검증
     RoomReservation reservation = roomReservationRepository.findById(reservationId)
         .orElseThrow(() -> new ReservationNotFoundException(Map.of(
             "reservationId", reservationId
         )));
 
-    // 예약 소유자 검증
-    if (!reservation.getEmployee().getId().equals(employeeId)) {
+    // 예약 소유자 또는 관리자/매니저만 취소 가능
+    boolean isOwner = reservation.getEmployee().getId().equals(employeeId);
+    boolean isManagerOrAdmin =
+        actor.getRole() == EmployeeRole.ADMIN || actor.getRole() == EmployeeRole.MANAGER;
+
+    if (!isOwner && !isManagerOrAdmin) {
       throw new ReservationNotOwnerException(Map.of("reservationId", reservationId));
     }
 
@@ -124,6 +135,14 @@ public class ReservationServiceImpl implements ReservationService {
 
     // 예약 취소 (삭제)
     reservation.cancel();
+
+    notificationService.notifyReservationCancelled(
+        employeeId,
+        reservation.getEmployee().getId(),
+        NotificationType.RESERVATION_CANCELLED,
+        "회의실 예약 취소 알림",
+        "예약하신 회의실 예약이 취소되었습니다. 예약 내역을 확인해주세요."
+    );
   }
 
   @Override

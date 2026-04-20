@@ -48,7 +48,7 @@ public interface EmployeeControllerApi {
       @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content),
       @ApiResponse(responseCode = "404", description = "직원 없음", content = @Content)
   })
-  ResponseEntity<CommonApiResponse<Void>> updateEmployee(Long id, UpdateEmployeeRequest request);
+  ResponseEntity<CommonApiResponse<Void>> updateEmployee(UserDetailsImpl userDetails, Long id, UpdateEmployeeRequest request);
 
   @Operation(summary = "직원 단건 조회", description = "직원 한 명의 정보를 조회합니다.")
   @ApiResponses({

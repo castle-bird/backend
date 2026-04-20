@@ -18,6 +18,7 @@ import io.project.backend.domain.employee.repository.DepartmentRepository;
 import io.project.backend.domain.employee.repository.EmployeePositionRepository;
 import io.project.backend.domain.employee.repository.EmployeeRepository;
 import io.project.backend.domain.employee.service.EmployeeService;
+import io.project.backend.domain.notification.entity.NotificationType;
 import io.project.backend.domain.notification.service.NotificationService;
 import io.project.backend.global.security.details.UserDetailsImpl;
 import java.util.List;
@@ -69,7 +70,7 @@ public class EmployeeServiceImpl implements EmployeeService {
   @Override
   @Transactional
   @PreAuthorize("hasRole('ROLE_ADMIN')")
-  public void updateEmployee(Long id, UpdateEmployeeRequest request) {
+  public void updateEmployee(Long adminId, Long id, UpdateEmployeeRequest request) {
 
     Employee employee = employeeRepository.findByIdAndDeletedFalse(id)
         .orElseThrow(() -> new EmployeeNotFoundException(Map.of("userId", id)));
@@ -99,6 +100,15 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     // 변경된 직원 정보 저장
     employeeRepository.save(employee);
+
+    // 알림 전송
+    notificationService.notifyEmployeeChanged(
+        adminId,
+        employee.getId(),
+        NotificationType.EMPLOYEE_CHANGED,
+        "직원 정보 변경 알림",
+        "귀하의 직원 정보가 변경되었습니다. 변경된 정보를 확인해주세요."
+    );
   }
 
   @Override

@@ -12,6 +12,8 @@ import io.project.backend.domain.employee.mapper.SalaryMapper;
 import io.project.backend.domain.employee.repository.EmployeeRepository;
 import io.project.backend.domain.employee.repository.SalaryRepository;
 import io.project.backend.domain.employee.service.SalaryService;
+import io.project.backend.domain.notification.entity.NotificationType;
+import io.project.backend.domain.notification.service.NotificationService;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,7 @@ public class SalaryServiceImpl implements SalaryService {
   private final SalaryRepository salaryRepository;
   private final EmployeeRepository employeeRepository;
   private final SalaryMapper salaryMapper;
+  private final NotificationService notificationService;
 
   @Override
   @Transactional
@@ -82,7 +85,7 @@ public class SalaryServiceImpl implements SalaryService {
   @Override
   @Transactional
   @PreAuthorize("hasRole('ROLE_ADMIN')")
-  public void updateSalary(Long employeeId, SalaryUpdateRequest request) {
+  public void updateSalary(Long adminId, Long employeeId, SalaryUpdateRequest request) {
     Salary salary = salaryRepository.findByEmployeeIdAndEmployeeDeletedIsFalse(employeeId)
         .orElseThrow(
             () -> new EmployeeNotFoundException(Map.of("employeeId", employeeId)));
@@ -91,5 +94,13 @@ public class SalaryServiceImpl implements SalaryService {
     salary.updatePaymentDay(request.paymentDay());
 
     salaryRepository.save(salary);
+
+    notificationService.notifySalaryChanged(
+        adminId,
+        employeeId,
+        NotificationType.SALARY_CHANGED,
+        "급여 정보 변경 알림",
+        "귀하의 급여 정보가 변경되었습니다. 변경된 정보를 확인해주세요."
+    );
   }
 }
