@@ -23,7 +23,7 @@ public class NotificationRepositoryImpl implements NotificationRepositoryCustom 
     return queryFactory
         .selectFrom(notification)
         .join(notification.sender, sender).fetchJoin()
-        .join(notification.recipient, recipient).fetchJoin()
+        .leftJoin(notification.recipient, recipient).fetchJoin()
         .where(
             notification.recipient.id.eq(recipientId)
                 .or(notification.recipient.isNull())
