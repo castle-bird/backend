@@ -29,6 +29,7 @@ public class NotificationController implements NotificationControllerApi {
   private final NotificationService notificationService;
   private final SseService sseService;
 
+  @Override
   @GetMapping(value = "/subscribe", produces = "text/event-stream")
   public SseEmitter subscribe(@AuthenticationPrincipal UserDetailsImpl userDetails) {
     return sseService.subscribe(userDetails.getUserId());

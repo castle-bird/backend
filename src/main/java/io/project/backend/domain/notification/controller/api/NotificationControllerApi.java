@@ -11,9 +11,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Tag(name = "Notification", description = "알림 API")
 public interface NotificationControllerApi {
+
+  @Operation(summary = "알림 SSE 구독", description = "인증된 사용자의 실시간 알림 스트림(SSE)을 구독합니다.")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "구독 성공"),
+      @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content)
+  })
+  SseEmitter subscribe(UserDetailsImpl userDetails);
 
   @Operation(summary = "내 알림 조회", description = "본인 수신 알림과 전사 공지를 최신순으로 조회합니다.")
   @ApiResponses({
