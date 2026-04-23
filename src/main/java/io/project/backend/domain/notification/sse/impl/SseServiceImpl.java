@@ -56,6 +56,52 @@ public class SseServiceImpl implements SseService {
     return emitter;
   }
 
+  @Override
+  public void sendToEmployee(Long employeeId, String eventName, Object payload) {
+    Map<String, SseEmitter> userEmitters = emitters.get(employeeId);
+
+    if (userEmitters == null || userEmitters.isEmpty()) {
+      return;
+    }
+
+    userEmitters.forEach(
+        (emitterId, emitter) -> sendEvent(employeeId, emitterId, emitter, eventName, payload));
+  }
+
+  @Override
+  public void sendToAll(String eventName, Object payload) {
+    emitters.forEach((employeeId, userEmitters) -> {
+      if (userEmitters == null || userEmitters.isEmpty()) {
+        return;
+      }
+      userEmitters.forEach(
+          (emitterId, emitter) -> sendEvent(employeeId, emitterId, emitter, eventName, payload));
+    });
+  }
+
+  // 알림 보내기
+  private void sendEvent(
+      Long employeeId,
+      String emitterId,
+      SseEmitter emitter,
+      String eventName,
+      Object payload
+  ) {
+    try {
+      emitter.send(
+          SseEmitter.event()
+              .name(eventName)
+              .data(payload)
+      );
+    } catch (Exception e) {
+      log.warn("SSE 이벤트 전송 실패. employeeId: {}, emitterId: {}, error: {}",
+          employeeId, emitterId, e.getMessage());
+      removeEmitter(employeeId, emitterId);
+      emitter.completeWithError(e);
+    }
+  }
+
+  // 연결 제거 → emitters에서 보관 중인 SseEmitter 제거하여 메모리 누수 방지
   private void removeEmitter(Long employeeId, String emitterId) {
     Map<String, SseEmitter> userEmitters = emitters.get(employeeId);
 

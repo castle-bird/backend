@@ -5,4 +5,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public interface SseService {
 
   SseEmitter subscribe(Long employeeId);
+
+  void sendToEmployee(Long subscriberId, String eventName, Object payload);
+
+  void sendToAll(String eventName, Object payload);
 }
