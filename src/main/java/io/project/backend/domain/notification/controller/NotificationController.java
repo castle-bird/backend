@@ -5,6 +5,7 @@ import io.project.backend.domain.notification.dto.request.FullNotificationCreate
 import io.project.backend.domain.notification.dto.response.NotificationResponse;
 import io.project.backend.domain.notification.entity.NotificationType;
 import io.project.backend.domain.notification.service.NotificationService;
+import io.project.backend.domain.notification.sse.SseService;
 import io.project.backend.global.response.CommonApiResponse;
 import io.project.backend.global.security.details.UserDetailsImpl;
 import jakarta.validation.Valid;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -25,13 +27,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class NotificationController implements NotificationControllerApi {
 
   private final NotificationService notificationService;
+  private final SseService sseService;
+
+  @GetMapping(value = "/subscribe", produces = "text/event-stream")
+  public SseEmitter subscribe(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    return sseService.subscribe(userDetails.getUserId());
+  }
 
   @Override
   @GetMapping("/me")
   public ResponseEntity<CommonApiResponse<List<NotificationResponse>>> getMyNotifications(
       @AuthenticationPrincipal UserDetailsImpl userDetails
   ) {
-    List<NotificationResponse> response = notificationService.getMyNotifications(userDetails.getUserId());
+    List<NotificationResponse> response = notificationService.getMyNotifications(
+        userDetails.getUserId());
 
     return ResponseEntity
         .status(HttpStatus.OK)
