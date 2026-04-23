@@ -28,7 +28,7 @@ public interface ReservationControllerApi {
       ReservationCreateRequest request
   );
 
-  @Operation(summary = "예약 취소", description = "본인 예약을 취소합니다.")
+  @Operation(summary = "예약 취소", description = "예약자 본인 또는 관리자/매니저가 예약을 취소합니다.")
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "취소 성공"),
       @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content),

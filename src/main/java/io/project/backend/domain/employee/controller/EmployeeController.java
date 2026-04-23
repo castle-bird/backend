@@ -76,11 +76,12 @@ public class EmployeeController implements EmployeeControllerApi {
   @Override
   @PutMapping("/{id}")
   public ResponseEntity<CommonApiResponse<Void>> updateEmployee(
+      @AuthenticationPrincipal UserDetailsImpl userDetails,
       @PathVariable Long id,
       @Valid @RequestBody UpdateEmployeeRequest request
   ) {
 
-    employeeService.updateEmployee(id, request);
+    employeeService.updateEmployee(userDetails.getUserId() ,id, request);
 
     return ResponseEntity
         .status(HttpStatus.NO_CONTENT)

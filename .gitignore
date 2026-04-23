@@ -48,6 +48,6 @@ AGENTS.md
 .aiassistant/*
 
 ### Files ###
-.log/
+.logs/*
 .upload/
 myPlan.md

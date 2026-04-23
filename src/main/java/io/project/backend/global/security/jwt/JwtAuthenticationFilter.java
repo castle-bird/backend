@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -68,6 +69,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
           new WebAuthenticationDetailsSource().buildDetails(request) // → 클라이언트 요청에 대한 부가 정보를 추가한다. IP 등등
       );
       SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+      MDC.put("userId", String.valueOf(userDetails.getUserId()));
 
     } catch (Exception ex) {
       log.error("JWT 인증 처리 중 예외가 발생했습니다.", ex);

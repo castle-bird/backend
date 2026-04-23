@@ -13,5 +13,5 @@ public interface SalaryService {
 
   SalaryResponse getSalaryMe(UserDetails userDetails);
 
-  void updateSalary(Long employeeId, SalaryUpdateRequest request);
+  void updateSalary(Long adminId, Long employeeId, SalaryUpdateRequest request);
 }

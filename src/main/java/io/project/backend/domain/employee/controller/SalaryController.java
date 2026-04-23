@@ -6,6 +6,7 @@ import io.project.backend.domain.employee.dto.request.SalaryUpdateRequest;
 import io.project.backend.domain.employee.dto.response.SalaryResponse;
 import io.project.backend.domain.employee.service.SalaryService;
 import io.project.backend.global.response.CommonApiResponse;
+import io.project.backend.global.security.details.UserDetailsImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -66,10 +67,11 @@ public class SalaryController implements SalaryControllerApi {
   @Override
   @PutMapping("/{employeeId}/salary")
   public ResponseEntity<CommonApiResponse<Void>> updateSalary(
+      @AuthenticationPrincipal UserDetailsImpl userDetails,
       @PathVariable Long employeeId,
       @Valid @RequestBody SalaryUpdateRequest request
   ) {
-    salaryService.updateSalary(employeeId, request);
+    salaryService.updateSalary(userDetails.getUserId(), employeeId, request);
 
     return ResponseEntity
         .status(HttpStatus.OK)
