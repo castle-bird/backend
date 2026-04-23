@@ -3,6 +3,7 @@ package io.project.backend.global.config;
 import io.project.backend.global.security.jwt.JwtAuthenticationFilter;
 import io.project.backend.global.security.jwt.JwtProperties;
 import io.project.backend.global.security.jwt.PasswordChangeRequiredFilter;
+import io.project.backend.global.logging.MdcLoggingFilter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -36,6 +37,7 @@ public class SecurityConfig {
 
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
   private final PasswordChangeRequiredFilter passwordChangeRequiredFilter;
+  private final MdcLoggingFilter mdcLoggingFilter;
   private final Environment environment;
 
   @Bean
@@ -47,7 +49,8 @@ public class SecurityConfig {
         .csrf(AbstractHttpConfigurer::disable)
         .sessionManagement(sessionManagementCustomizer())
         .cors(corsCustomizer())
-        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterBefore(mdcLoggingFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterAfter(jwtAuthenticationFilter, MdcLoggingFilter.class)
         .addFilterAfter(passwordChangeRequiredFilter,JwtAuthenticationFilter.class) // → 인증 완료 후, 최초 비번 변경했는지 체크
         .build();
   }
