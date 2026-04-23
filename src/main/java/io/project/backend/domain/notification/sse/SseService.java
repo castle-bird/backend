@@ -6,7 +6,7 @@ public interface SseService {
 
   SseEmitter subscribe(Long employeeId);
 
-  void sendToEmployee(Long subscriberId, String eventName, Object payload);
+  void sendToEmployee(Long employeeId, String eventName, Object payload);
 
   void sendToAll(String eventName, Object payload);
 }

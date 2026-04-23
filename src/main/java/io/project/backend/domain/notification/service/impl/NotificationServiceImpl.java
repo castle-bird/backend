@@ -4,14 +4,17 @@ import io.project.backend.domain.employee.entity.Employee;
 import io.project.backend.domain.employee.exception.EmployeeNotFoundException;
 import io.project.backend.domain.employee.repository.EmployeeRepository;
 import io.project.backend.domain.notification.dto.response.NotificationResponse;
+import io.project.backend.domain.notification.entity.Notification;
 import io.project.backend.domain.notification.entity.NotificationType;
 import io.project.backend.domain.notification.mapper.NotificationMapper;
+import io.project.backend.domain.notification.pubsub.NotificationSseEvent;
 import io.project.backend.domain.notification.repository.NotificationRepository;
 import io.project.backend.domain.notification.service.NotificationService;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +27,7 @@ public class NotificationServiceImpl implements NotificationService {
   private final NotificationRepository notificationRepository;
   private final EmployeeRepository employeeRepository;
   private final NotificationMapper notificationMapper;
+  private final ApplicationEventPublisher eventPublisher;
 
   @Override
   @Transactional
@@ -37,7 +41,7 @@ public class NotificationServiceImpl implements NotificationService {
     Employee sender = getEmployeeById(senderId);
     Employee recipient = getEmployeeById(recipientId);
 
-    notificationRepository.save(
+    Notification saved = notificationRepository.save(
         notificationMapper.toEntityForCreate(
             sender,
             recipient,
@@ -46,6 +50,9 @@ public class NotificationServiceImpl implements NotificationService {
             message
         )
     );
+
+    NotificationResponse response = NotificationResponse.from(saved);
+    eventPublisher.publishEvent(NotificationSseEvent.toEmployee(recipientId, "월급 변경 알림", response));
   }
 
   @Override
@@ -60,7 +67,7 @@ public class NotificationServiceImpl implements NotificationService {
     Employee sender = getEmployeeById(senderId);
     Employee recipient = getEmployeeById(recipientId);
 
-    notificationRepository.save(
+    Notification saved = notificationRepository.save(
         notificationMapper.toEntityForCreate(
             sender,
             recipient,
@@ -69,6 +76,9 @@ public class NotificationServiceImpl implements NotificationService {
             message
         )
     );
+
+    NotificationResponse response = NotificationResponse.from(saved);
+    eventPublisher.publishEvent(NotificationSseEvent.toEmployee(recipientId, "정보 변경 알림", response));
   }
 
   @Override
@@ -83,7 +93,7 @@ public class NotificationServiceImpl implements NotificationService {
     Employee sender = getEmployeeById(senderId);
     Employee recipient = getEmployeeById(recipientId);
 
-    notificationRepository.save(
+    Notification saved = notificationRepository.save(
         notificationMapper.toEntityForCreate(
             sender,
             recipient,
@@ -92,6 +102,9 @@ public class NotificationServiceImpl implements NotificationService {
             message
         )
     );
+
+    NotificationResponse response = NotificationResponse.from(saved);
+    eventPublisher.publishEvent(NotificationSseEvent.toEmployee(recipientId, "회의실 예약 변경 알림", response));
   }
 
   @Override
@@ -105,7 +118,7 @@ public class NotificationServiceImpl implements NotificationService {
   ) {
     Employee sender = getEmployeeById(senderId);
 
-    notificationRepository.save(
+    Notification saved = notificationRepository.save(
         notificationMapper.toEntityForCreate(
             sender,
             null,
@@ -114,6 +127,9 @@ public class NotificationServiceImpl implements NotificationService {
             message
         )
     );
+
+    NotificationResponse response = NotificationResponse.from(saved);
+    eventPublisher.publishEvent(NotificationSseEvent.toAll("전체 공지", response));
   }
 
   @Override
