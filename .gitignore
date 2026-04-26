@@ -42,10 +42,12 @@ application-dev.yaml
 application-prod.yaml
 
 ### AI ###
-### AI ###
 CLAUDE.md
-copilot-instructions.md
+.claude/*
+AGENTS.md
+.aiassistant/*
 
 ### Files ###
-.log/
+.logs/*
 .upload/
+myPlan.md

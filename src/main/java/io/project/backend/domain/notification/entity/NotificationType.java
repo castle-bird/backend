@@ -9,5 +9,5 @@ public enum NotificationType {
 
   // 개인 대상 알림 - 해당 직원에게만 발송 (recipient_id 필수)
   SALARY_CHANGED,
-  POSITION_CHANGED,
+  EMPLOYEE_CHANGED
 }

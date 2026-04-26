@@ -32,6 +32,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'  // AWS 헬스체크 & 모니터링
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
 
     // Database
     implementation 'org.flywaydb:flyway-core'
@@ -42,20 +43,23 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
 
     // Swagger API
-    implementation 'io.swagger.core.v3:swagger-annotations:2.2.46'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
+
 
     // Lib (MapStruct, Lombok, Querydsl)
     implementation 'org.mapstruct:mapstruct:1.6.3'
-    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
     compileOnly 'org.projectlombok:lombok'
+    // Lombok → lombok-mapstruct-binding → mapstruct-processor 순서 보장 (Builder 먼저 생성)
+    annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
     implementation 'io.github.openfeign.querydsl:querydsl-jpa:7.1'
     annotationProcessor 'io.github.openfeign.querydsl:querydsl-apt:7.1:jpa'
-    annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
     annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
     implementation 'io.jsonwebtoken:jjwt-api:0.13.0'
-    runtimeOnly 'io.jsonwebtoken:jjwt-api:0.13.0'
-    runtimeOnly 'io.jsonwebtoken:jjwt-api:0.13.0'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.13.0'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.13.0'
 
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -68,6 +72,21 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:postgresql'
+
+    // AWS
+
+    // AWS SDK 버전 관리를 위한 BOM (Bill of Materials)
+    implementation platform('software.amazon.awssdk:bom:2.21.29')
+    // Amazon S3 파일 업로드/다운로드/삭제를 위한 클라이언트
+    implementation 'software.amazon.awssdk:s3'
+    // Amazon RDS 데이터베이스 연결을 위한 클라이언트
+    implementation 'software.amazon.awssdk:rds'
+    // AWS 인증 및 권한 처리를 위한 라이브러리
+    implementation 'software.amazon.awssdk:auth'
+    // AWS SDK 핵심 공통 라이브러리
+    implementation 'software.amazon.awssdk:aws-core'
+    // AWS 리전(지역) 설정 및 관리 라이브러리
+    implementation 'software.amazon.awssdk:regions'
 }
 
 
@@ -83,9 +102,4 @@ jacocoTestReport {
             ])
         }))
     }
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
-    finalizedBy jacocoTestReport
 }
