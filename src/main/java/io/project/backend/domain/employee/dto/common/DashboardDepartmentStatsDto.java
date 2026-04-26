@@ -5,7 +5,7 @@ import java.time.LocalDate;
 public record DashboardDepartmentStatsDto(
     LocalDate snapshotDate,
     String departmentName,
-    Long employeeCount,
+    int employeeCount,
     String managerName
 ) {
 
@@ -19,7 +19,7 @@ public record DashboardDepartmentStatsDto(
     return new DashboardDepartmentStatsDto(
         now,
         departmentName,
-        employeeCount,
+        employeeCount.intValue(),
         managerName
     );
   }
