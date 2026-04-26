@@ -15,13 +15,13 @@ import org.springframework.stereotype.Repository;
 public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
 
   private final JPAQueryFactory queryFactory;
+  private final QEmployee e = QEmployee.employee;
+  private final QDepartment d = QDepartment.department;
+  private final QEmployeePosition p = QEmployeePosition.employeePosition;
 
   @Override
   public List<Employee> findAllByCursor(String department, String position, Long cursor, int size) {
     int pageSize = size + 1;
-    QEmployee e = QEmployee.employee;
-    QDepartment d = QDepartment.department;
-    QEmployeePosition p = QEmployeePosition.employeePosition;
 
     return queryFactory
         .selectFrom(e)
