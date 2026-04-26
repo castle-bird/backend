@@ -1,12 +1,10 @@
-package io.project.backend.domain.dashboard.repository;
+package io.project.backend.domain.dashboard.repository.departmentStats;
 
 import io.project.backend.domain.dashboard.entity.DashboardDepartmentStats;
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface DashboardDepartmentStatsRepository extends
-    JpaRepository<DashboardDepartmentStats, Long> {
+public interface DashboardDepartmentStatsRepositoryCustom {
 
   List<DashboardDepartmentStats> findAllBySnapshotDate(LocalDate snapshotDate);
 

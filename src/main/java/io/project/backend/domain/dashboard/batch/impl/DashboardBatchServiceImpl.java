@@ -1,8 +1,8 @@
 package io.project.backend.domain.dashboard.batch.impl;
 
 import io.project.backend.domain.dashboard.batch.DashboardBatchService;
-import io.project.backend.domain.dashboard.repository.DashboardDailyStatsRepository;
-import io.project.backend.domain.dashboard.repository.DashboardDepartmentStatsRepository;
+import io.project.backend.domain.dashboard.repository.dailyStats.DashboardDailyStatsRepository;
+import io.project.backend.domain.dashboard.repository.departmentStats.DashboardDepartmentStatsRepository;
 import io.project.backend.domain.employee.repository.DepartmentRepository;
 import io.project.backend.domain.employee.repository.EmployeeRepository;
 import io.project.backend.domain.reservation.repository.RoomReservationRepository;
@@ -31,6 +31,6 @@ public class DashboardBatchServiceImpl implements DashboardBatchService {
   @Override
   @Transactional
   public void aggregateDepartmentStats() {
-    
+
   }
 }
