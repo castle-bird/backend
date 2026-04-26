@@ -20,7 +20,7 @@ public interface DashboardControllerApi {
         @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content),
         @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content)
     })
-    ResponseEntity<CommonApiResponse<DashboardDailyStatsResponse>> getDailyStats();
+    ResponseEntity<CommonApiResponse<List<DashboardDailyStatsResponse>>> getDailyStats();
 
     @Operation(summary = "부서별 현황 조회", description = "부서별 직원 수와 부서장 이름을 조회합니다.")
     @ApiResponses({

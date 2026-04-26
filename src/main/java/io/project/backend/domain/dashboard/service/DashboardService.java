@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface DashboardService {
 
-  DashboardDailyStatsResponse getDailyStats();
+  List<DashboardDailyStatsResponse> getDailyStats();
 
   List<DepartmentStatResponse> getDepartmentStats();
 }

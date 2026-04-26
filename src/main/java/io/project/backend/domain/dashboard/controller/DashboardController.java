@@ -22,13 +22,14 @@ public class DashboardController implements DashboardControllerApi {
 
   @Override
   @GetMapping("/stats")
-  public ResponseEntity<CommonApiResponse<DashboardDailyStatsResponse>> getDailyStats() {
+  public ResponseEntity<CommonApiResponse<List<DashboardDailyStatsResponse>>> getDailyStats() {
 
-    DashboardDailyStatsResponse response = dashboardService.getDailyStats();
+    List<DashboardDailyStatsResponse> responses = dashboardService.getDailyStats();
 
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(CommonApiResponse.ok(response));
+        .body(CommonApiResponse.ok(responses));
+
   }
 
   @Override

@@ -19,7 +19,7 @@ public class DashboardServiceImpl implements DashboardService {
 
   @Override
   @Transactional(readOnly = true)
-  public DashboardDailyStatsResponse getDailyStats() {
+  public List<DashboardDailyStatsResponse> getDailyStats() {
 
     return null;
   }
