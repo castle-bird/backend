@@ -13,8 +13,9 @@ public class DashboardScheduler {
 
   private final DashboardBatchService dashboardBatchService;
 
-  @Scheduled(cron = "0 0 0 * * *") // 매일 자정
+  @Scheduled(cron = "0 0 23 * * *") // 매일 23시
   public void scheduleDashboardAggregation() {
-    // TODO: 구현
+    dashboardBatchService.dailyStats();
+    dashboardBatchService.departmentStats();
   }
 }

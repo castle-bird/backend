@@ -6,6 +6,7 @@ import io.project.backend.domain.employee.entity.QDepartment;
 import io.project.backend.domain.employee.entity.QEmployee;
 import io.project.backend.domain.employee.repository.DepartmentRepositoryCustom;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -37,7 +38,7 @@ public class DepartmentRepositoryImpl implements DepartmentRepositoryCustom {
         .stream()
         .map(tuple -> DashboardDepartmentStatsDto.of(
             tuple.get(d.name),
-            tuple.get(e.count()),
+            Objects.requireNonNull(tuple.get(e.count())),
             tuple.get(manager.name)
         ))
         .toList();
