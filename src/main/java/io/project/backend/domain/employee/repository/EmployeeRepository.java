@@ -5,7 +5,8 @@ import java.time.LocalDate;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface EmployeeRepository extends JpaRepository<Employee, Long>, EmployeeRepositoryCustom {
+public interface EmployeeRepository extends JpaRepository<Employee, Long>,
+    EmployeeRepositoryCustom {
 
   boolean existsByEmail(String email);
 
@@ -16,4 +17,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, Emplo
   Optional<Employee> findByEmailAndDeletedFalse(String email);
 
   Optional<Employee> findByIdAndDeletedFalse(Long id);
+
+  // 전체 직원 수 (퇴사자 제외)
+  long countByDeletedFalse();
 }

@@ -19,7 +19,6 @@ public class DashboardDailyStats extends BaseEntity {
   @Column(nullable = false, unique = true)
   private LocalDate snapshotDate;
 
-  // 직원 현황
   @Column(nullable = false)
   private int totalEmployees;
 
@@ -32,52 +31,30 @@ public class DashboardDailyStats extends BaseEntity {
   @Column(nullable = false)
   private int employeeCount;
 
-  // 예약 현황
-  @Column(nullable = false)
-  private int todayConfirmed;
-
-  @Column(nullable = false)
-  private int todayCancelled;
-
-  @Column(nullable = false)
-  private int monthlyTotalReservations;
-
   @Builder
   private DashboardDailyStats(
       LocalDate snapshotDate,
       int totalEmployees,
       int newHiresThisMonth,
       int managerCount,
-      int employeeCount,
-      int todayConfirmed,
-      int todayCancelled,
-      int monthlyTotalReservations
+      int employeeCount
   ) {
     this.snapshotDate = snapshotDate;
     this.totalEmployees = totalEmployees;
     this.newHiresThisMonth = newHiresThisMonth;
     this.managerCount = managerCount;
     this.employeeCount = employeeCount;
-    this.todayConfirmed = todayConfirmed;
-    this.todayCancelled = todayCancelled;
-    this.monthlyTotalReservations = monthlyTotalReservations;
   }
 
   public void update(
       int totalEmployees,
       int newHiresThisMonth,
       int managerCount,
-      int employeeCount,
-      int todayConfirmed,
-      int todayCancelled,
-      int monthlyTotalReservations
+      int employeeCount
   ) {
     this.totalEmployees = totalEmployees;
     this.newHiresThisMonth = newHiresThisMonth;
     this.managerCount = managerCount;
     this.employeeCount = employeeCount;
-    this.todayConfirmed = todayConfirmed;
-    this.todayCancelled = todayCancelled;
-    this.monthlyTotalReservations = monthlyTotalReservations;
   }
 }

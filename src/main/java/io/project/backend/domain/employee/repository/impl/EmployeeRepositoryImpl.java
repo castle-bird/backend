@@ -2,10 +2,12 @@ package io.project.backend.domain.employee.repository.impl;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import io.project.backend.domain.employee.entity.Employee;
+import io.project.backend.domain.employee.entity.EmployeeRole;
 import io.project.backend.domain.employee.entity.QDepartment;
 import io.project.backend.domain.employee.entity.QEmployee;
 import io.project.backend.domain.employee.entity.QEmployeePosition;
 import io.project.backend.domain.employee.repository.EmployeeRepositoryCustom;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -36,5 +38,33 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
         .orderBy(e.id.asc())
         .limit(pageSize)
         .fetch();
+  }
+
+  @Override
+  public long countByHireDateBetween(LocalDate startDate, LocalDate endDate) {
+    Long result = queryFactory
+        .select(e.count())
+        .from(e)
+        .where(
+            e.hireDate.between(startDate, endDate),
+            e.deleted.isFalse()
+        )
+        .fetchOne();
+
+    return result != null ? result : 0L;
+  }
+
+  @Override
+  public long countByRole(EmployeeRole role) {
+    Long result = queryFactory
+        .select(e.count())
+        .from(e)
+        .where(
+            e.role.eq(role),
+            e.deleted.isFalse()
+        )
+        .fetchOne();
+
+    return result != null ? result : 0L;
   }
 }

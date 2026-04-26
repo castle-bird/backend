@@ -10,13 +10,8 @@ public record DashboardDailyStatsResponse(
     int totalEmployees,
     int newHiresThisMonth,
     int managerCount,
-    int employeeCount,
-
-    // 예약 현황
-    int todayConfirmed,
-    int todayCancelled,
-    int monthlyTotalReservations
-) {
+    int employeeCount
+    ) {
 
   public static DashboardDailyStatsResponse from(DashboardDailyStats entity) {
     return new DashboardDailyStatsResponse(
@@ -24,10 +19,7 @@ public record DashboardDailyStatsResponse(
         entity.getTotalEmployees(),
         entity.getNewHiresThisMonth(),
         entity.getManagerCount(),
-        entity.getEmployeeCount(),
-        entity.getTodayConfirmed(),
-        entity.getTodayCancelled(),
-        entity.getMonthlyTotalReservations()
+        entity.getEmployeeCount()
     );
   }
 }
