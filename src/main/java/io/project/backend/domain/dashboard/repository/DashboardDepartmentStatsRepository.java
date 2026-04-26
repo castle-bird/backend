@@ -1,4 +1,4 @@
-package io.project.backend.domain.dashboard.repository.departmentStats;
+package io.project.backend.domain.dashboard.repository;
 
 import io.project.backend.domain.dashboard.entity.DashboardDepartmentStats;
 import org.springframework.data.jpa.repository.JpaRepository;
