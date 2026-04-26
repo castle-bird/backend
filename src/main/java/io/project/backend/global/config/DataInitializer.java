@@ -27,6 +27,7 @@ public class DataInitializer implements CommandLineRunner {
   private static final String MANAGEMENT_SUPPORT_TEAM = "경영지원팀";
   private static final String DEFAULT_ADMIN_ADDRESS = "서울시 강남구";
   private static final String DEFAULT_ADMIN_PHONE = "010-1234-1004";
+  private static final short DEFAULT_POSITION_SORT_ORDER = 1;
 
   private final DepartmentRepository departmentRepository;
   private final EmployeeRepository employeeRepository;
@@ -38,15 +39,13 @@ public class DataInitializer implements CommandLineRunner {
   @Transactional
   public void run(String... args) {
     if (employeeRepository.existsByEmail(adminProperties.email())) {
-      log.debug("=====================================================================================================");
-      log.debug("=========================== 관리자 계정이 이미 존재합니다. 초기화를 건너뜁니다. ===========================");
-      log.debug("=====================================================================================================");
+      log.debug("관리자 계정이 이미 존재합니다. 초기화를 건너뜁니다.");
       return;
     }
 
-    String encodedPassword = passwordEncoder.encode(adminProperties.password());
     Department department = departmentRepository.findByName(MANAGEMENT_SUPPORT_TEAM).orElse(null);
-    EmployeePosition employeePosition = employeePositionRepository.findByName(ADMIN_POSITION).orElse(null);
+    EmployeePosition employeePosition = getOrCreateAdminPosition();
+    String encodedPassword = passwordEncoder.encode(adminProperties.password());
 
     Employee admin = Employee.builder()
         .employeeNumber(ADMIN_EMPLOYEE_NUMBER)
@@ -65,8 +64,21 @@ public class DataInitializer implements CommandLineRunner {
 
     employeeRepository.save(admin);
 
-    log.info("=====================================================================================================");
-    log.info("======================== 초기 관리자 계정을 생성했습니다. 이메일: {} ========================", adminProperties.email());
-    log.info("=====================================================================================================");
+    log.info("초기 관리자 계정을 생성했습니다. email={}", adminProperties.email());
+  }
+
+  private EmployeePosition getOrCreateAdminPosition() {
+    return employeePositionRepository.findByName(ADMIN_POSITION)
+        .orElseGet(() -> {
+          short nextSortOrder = employeePositionRepository.findTopByOrderBySortOrderDesc()
+              .map(position -> (short) (position.getSortOrder() + 1))
+              .orElse(DEFAULT_POSITION_SORT_ORDER);
+          EmployeePosition created = employeePositionRepository.save(EmployeePosition.builder()
+              .name(ADMIN_POSITION)
+              .sortOrder(nextSortOrder)
+              .build());
+          log.info("직급 '{}'이(가) 없어 자동 생성했습니다. sortOrder={}", ADMIN_POSITION, nextSortOrder);
+          return created;
+        });
   }
 }
