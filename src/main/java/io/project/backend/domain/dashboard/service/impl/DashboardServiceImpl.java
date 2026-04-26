@@ -9,6 +9,7 @@ import io.project.backend.domain.dashboard.mapper.DashboardDepartmentStatsMapper
 import io.project.backend.domain.dashboard.repository.DashboardDailyStatsRepository;
 import io.project.backend.domain.dashboard.repository.DashboardDepartmentStatsRepository;
 import io.project.backend.domain.dashboard.service.DashboardService;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,7 @@ public class DashboardServiceImpl implements DashboardService {
   @Transactional(readOnly = true)
   public List<DepartmentStatResponse> getDepartmentStats() {
 
-    List<DashboardDepartmentStats> result = departmentStatsRepository.findAll();
+    List<DashboardDepartmentStats> result = departmentStatsRepository.findAllBySnapshotDate(LocalDate.now().minusDays(1));
 
     return result.stream()
         .map(dashboardDepartmentStatsMapper::toResponse)
