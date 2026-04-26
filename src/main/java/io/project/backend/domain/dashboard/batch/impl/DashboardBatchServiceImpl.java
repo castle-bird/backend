@@ -58,6 +58,7 @@ public class DashboardBatchServiceImpl implements DashboardBatchService {
   @Override
   @Transactional
   public void departmentStats() {
-
+    // 부서별 통계
+    departmentRepository.getDepartmentStats();
   }
 }
