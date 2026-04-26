@@ -74,6 +74,10 @@ jobs:
             ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
             ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
             ADMIN_NAME=${{ secrets.ADMIN_NAME }}
+            SPRING_DATASOURCE_URL=${{ secrets.POSTGRES_URL }}?reWriteBatchedInserts=true
+            SPRING_DATASOURCE_USERNAME=${{ secrets.POSTGRES_USER }}
+            SPRING_DATASOURCE_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            SPRING_DATA_REDIS_HOST=${{ secrets.REDIS_HOST }}
 
       - name: ECS 배포
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
