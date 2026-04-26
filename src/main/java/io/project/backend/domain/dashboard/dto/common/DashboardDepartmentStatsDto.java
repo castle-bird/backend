@@ -1,4 +1,4 @@
-package io.project.backend.domain.employee.dto.common;
+package io.project.backend.domain.dashboard.dto.common;
 
 import java.time.LocalDate;
 

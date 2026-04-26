@@ -1,6 +1,6 @@
 package io.project.backend.domain.employee.repository;
 
-import io.project.backend.domain.employee.dto.common.DashboardDepartmentStatsDto;
+import io.project.backend.domain.dashboard.dto.common.DashboardDepartmentStatsDto;
 import java.util.List;
 
 public interface DepartmentRepositoryCustom {

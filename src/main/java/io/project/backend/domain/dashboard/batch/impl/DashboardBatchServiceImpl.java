@@ -6,7 +6,7 @@ import io.project.backend.domain.dashboard.entity.DashboardDepartmentStats;
 import io.project.backend.domain.dashboard.mapper.DashboardDailyStatsMapper;
 import io.project.backend.domain.dashboard.repository.DashboardDailyStatsRepository;
 import io.project.backend.domain.dashboard.repository.DashboardDepartmentStatsRepository;
-import io.project.backend.domain.employee.dto.common.DashboardDepartmentStatsDto;
+import io.project.backend.domain.dashboard.dto.common.DashboardDepartmentStatsDto;
 import io.project.backend.domain.employee.entity.EmployeeRole;
 import io.project.backend.domain.employee.repository.DepartmentRepository;
 import io.project.backend.domain.employee.repository.EmployeeRepository;

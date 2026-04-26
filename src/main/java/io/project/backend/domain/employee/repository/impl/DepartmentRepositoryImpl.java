@@ -1,7 +1,7 @@
 package io.project.backend.domain.employee.repository.impl;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import io.project.backend.domain.employee.dto.common.DashboardDepartmentStatsDto;
+import io.project.backend.domain.dashboard.dto.common.DashboardDepartmentStatsDto;
 import io.project.backend.domain.employee.entity.QDepartment;
 import io.project.backend.domain.employee.entity.QEmployee;
 import io.project.backend.domain.employee.repository.DepartmentRepositoryCustom;
