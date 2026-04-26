@@ -64,6 +64,11 @@ public class SecurityConfig {
       }
 
       auth
+          .requestMatchers(
+              "/actuator/health",
+              "/actuator/health/**",
+              "/actuator/info"
+          ).permitAll()
           .requestMatchers(HttpMethod.POST, "/auth/registe").hasRole("ADMIN")
           .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
           .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
