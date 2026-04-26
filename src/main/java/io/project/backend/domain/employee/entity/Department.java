@@ -1,12 +1,16 @@
 package io.project.backend.domain.employee.entity;
 
 import io.project.backend.global.entity.BaseTimeEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,6 +29,10 @@ public class Department extends BaseTimeEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "manager_id")
   private Employee manager;
+
+  // 양방향 연관관계 설정
+  @OneToMany(mappedBy = "department", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Employee> employees = new ArrayList<>();
 
   @Builder
   private Department(String name, Employee manager) {
