@@ -65,6 +65,7 @@ public class SecurityConfig {
       }
 
       auth
+          .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
           .requestMatchers(EndpointRequest.to("health", "info")).permitAll()
           .requestMatchers(
               "/actuator/health",
@@ -87,6 +88,12 @@ public class SecurityConfig {
       config.setAllowedOrigins(List.of(
           "http://localhost:8080",   // 서버 확인용
           "http://localhost:5173"    // React (Vite)
+      ));
+    }
+
+    if (environment.acceptsProfiles(Profiles.of("prod"))) {
+      config.setAllowedOrigins(List.of(
+          "https://castle-bird-front.vercel.app"
       ));
     }
 
