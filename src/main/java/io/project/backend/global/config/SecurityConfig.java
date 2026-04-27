@@ -65,6 +65,7 @@ public class SecurityConfig {
       }
 
       auth
+          .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
           .requestMatchers(EndpointRequest.to("health", "info")).permitAll()
           .requestMatchers(
               "/actuator/health",
