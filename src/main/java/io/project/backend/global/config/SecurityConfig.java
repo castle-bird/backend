@@ -6,6 +6,7 @@ import io.project.backend.global.security.jwt.PasswordChangeRequiredFilter;
 import io.project.backend.global.logging.MdcLoggingFilter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -64,6 +65,7 @@ public class SecurityConfig {
       }
 
       auth
+          .requestMatchers(EndpointRequest.to("health", "info")).permitAll()
           .requestMatchers(
               "/actuator/health",
               "/actuator/health/**",
