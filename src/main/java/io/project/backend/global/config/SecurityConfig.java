@@ -90,6 +90,12 @@ public class SecurityConfig {
       ));
     }
 
+    if (environment.acceptsProfiles(Profiles.of("prod"))) {
+      config.setAllowedOrigins(List.of(
+          "https://castle-bird-front.vercel.app"
+      ));
+    }
+
     config.setAllowedMethods(List.of("*"));
     config.setAllowedHeaders(List.of("*"));
     config.setAllowCredentials(true);
