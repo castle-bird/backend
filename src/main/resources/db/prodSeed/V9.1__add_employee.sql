@@ -26,4 +26,5 @@ VALUES
   ('25021401', '조민호',  'minho.jo@gmail.com',        crypt('Test1234!', gen_salt('bf', 10)), 'EMPLOYEE', 2, 5, '2025-02-14', '서울시 관악구',        '010-7831-2495', true),
   ('25060301', '문지원',  'jiwon.moon@gmail.com',      crypt('Test1234!', gen_salt('bf', 10)), 'EMPLOYEE', 2, 6, '2025-06-03', '경기도 용인시 수지구',  '010-5402-1938', true),
   ('25092201', '남기현',  'gihyun.nam@gmail.com',      crypt('Test1234!', gen_salt('bf', 10)), 'EMPLOYEE', 4, 1, '2025-09-22', '경기도 화성시 동탄구',  '010-9871-3412', true),
-  ('26011501', '석혜린',  'hyerin.seok@gmail.com',     crypt('Test1234!', gen_salt('bf', 10)), 'EMPLOYEE', 2, 8, '2026-01-15', '서울시 종로구',        '010-1397-2468', true);
+  ('26011501', '석혜린',  'hyerin.seok@gmail.com',     crypt('Test1234!', gen_salt('bf', 10)), 'EMPLOYEE', 2, 8, '2026-01-15', '서울시 종로구',        '010-1397-2468', true)
+ON CONFLICT DO NOTHING;
