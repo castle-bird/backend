@@ -2,7 +2,9 @@ package io.project.backend.domain.auth.repository;
 
 import java.time.Duration;
 import java.time.Instant;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface RefreshTokenRedisRepository {
 
   void save(Long userId, String tokenId, String refreshToken, Instant issuedAt, Duration ttl);

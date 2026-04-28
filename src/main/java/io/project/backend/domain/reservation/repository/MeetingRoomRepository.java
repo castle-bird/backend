@@ -4,7 +4,9 @@ import io.project.backend.domain.reservation.entity.MeetingRoom;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface MeetingRoomRepository extends JpaRepository<MeetingRoom, Long> {
 
   List<MeetingRoom> findAllByActiveIs(boolean active);
