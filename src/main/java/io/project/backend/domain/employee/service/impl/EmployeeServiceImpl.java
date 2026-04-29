@@ -9,6 +9,7 @@ import io.project.backend.domain.employee.dto.response.EmployeeResponse;
 import io.project.backend.domain.employee.entity.Department;
 import io.project.backend.domain.employee.entity.Employee;
 import io.project.backend.domain.employee.entity.EmployeePosition;
+import io.project.backend.domain.employee.entity.EmployeeRole;
 import io.project.backend.domain.employee.exception.DepartmentNotFoundException;
 import io.project.backend.domain.employee.exception.EmployeeDuplicateException;
 import io.project.backend.domain.employee.exception.EmployeeNotFoundException;
@@ -74,6 +75,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     Employee employee = employeeRepository.findByIdAndDeletedFalse(id)
         .orElseThrow(() -> new EmployeeNotFoundException(Map.of("userId", id)));
+    Department previousDepartment = employee.getDepartment();
+    EmployeeRole previousRole = employee.getRole();
 
     // 이메일 중복 체크 (현재 이메일과 다르면서, 이미 존재하는 이메일인 경우)
     if (!employee.getEmail().equals(request.email())
@@ -100,6 +103,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     // 변경된 직원 정보 저장
     employeeRepository.save(employee);
+    syncDepartmentManager(employee, previousDepartment, previousRole);
 
     // 알림 전송
     notificationService.notifyEmployeeChanged(
@@ -156,5 +160,31 @@ public class EmployeeServiceImpl implements EmployeeService {
         .orElseThrow(() -> new EmployeeNotFoundException(Map.of("userId", userId)));
 
     return employeeMapper.toEmployeeResponse(find);
+  }
+
+  private void syncDepartmentManager(
+      Employee employee,
+      Department previousDepartment,
+      EmployeeRole previousRole
+  ) {
+    Department currentDepartment = employee.getDepartment();
+    EmployeeRole currentRole = employee.getRole();
+
+    if (previousRole == EmployeeRole.MANAGER
+        && previousDepartment != null
+        && isSameEmployee(previousDepartment.getManager(), employee)) {
+      previousDepartment.assignManager(null);
+    }
+
+    if (currentRole == EmployeeRole.MANAGER && currentDepartment != null) {
+      currentDepartment.assignManager(employee);
+    }
+  }
+
+  private boolean isSameEmployee(Employee manager, Employee employee) {
+    return manager != null
+        && manager.getId() != null
+        && employee.getId() != null
+        && manager.getId().equals(employee.getId());
   }
 }
