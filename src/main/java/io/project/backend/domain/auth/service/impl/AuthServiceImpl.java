@@ -14,6 +14,7 @@ import io.project.backend.domain.auth.service.AuthService;
 import io.project.backend.domain.employee.entity.Department;
 import io.project.backend.domain.employee.entity.Employee;
 import io.project.backend.domain.employee.entity.EmployeePosition;
+import io.project.backend.domain.employee.entity.EmployeeRole;
 import io.project.backend.domain.employee.exception.DepartmentNotFoundException;
 import io.project.backend.domain.employee.exception.EmployeeDuplicateException;
 import io.project.backend.domain.employee.exception.EmployeeNotFoundException;
@@ -96,6 +97,9 @@ public class AuthServiceImpl implements AuthService {
     );
 
     employeeRepository.save(employee);
+    if (employee.getRole() == EmployeeRole.MANAGER) {
+      department.assignManager(employee);
+    }
 
     return SignupResponse.form(employee.getEmail(), temporaryPassword);
   }
